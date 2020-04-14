@@ -135,6 +135,15 @@ class TimelineFieldset extends Fieldset
                 'attributes' => [
                     'required' => true,
                 ],
+            ])
+
+            ->add([
+                'name' => 'o:block[__blockIndex__][o:data][filters]',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Filters', // @translate
+                    'info' => '.', // @translate
+                ],
             ]);
     }
 }

@@ -19,6 +19,7 @@ $escape = $this->plugin('escapeHtml');
         if (typeof params.centerDate === 'undefined') {
             params.centerDate = <?= json_encode($data['center_date']) ?>;
         }
+        params.filters = <?= json_encode($data['filters']) ?>;
 
         oTimeline.loadTimeline(
             'timeline-<?= $block->id() ?>',

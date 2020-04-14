@@ -138,7 +138,7 @@ var oTimeline = {
         tl.getBand(0).setCenterVisibleDate(parsedDate);
       }
     });
-    setupFilterHighlightControls(document.getElementById("filters"), window.tl, [0,1], Timeline.ClassicTheme.create());
+    setupFilterHighlightControls(document.getElementById("filters"), window.tl, [0,1], Timeline.ClassicTheme.create(), params);
   }
 };
 
@@ -163,7 +163,8 @@ function test1() {
 
 
 
-function setupFilterHighlightControls(div, timeline, bandIndices, theme) {
+function setupFilterHighlightControls(div, timeline, bandIndices, theme, params) {
+  console.log("pokjnhikjnjijnijijkio "+params.filters);
   var table = document.createElement("table");
   var tr = table.insertRow(0);
 
