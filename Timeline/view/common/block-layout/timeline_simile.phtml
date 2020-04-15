@@ -7,7 +7,6 @@
 
 $escape = $this->plugin('escapeHtml');
 ?>
-
 <?php if (!empty($data['heading'])): ?>
 <h2><?= $escape($data['heading']) ?></h2>
 <?php endif; ?>
@@ -20,6 +19,7 @@ $escape = $this->plugin('escapeHtml');
             params.centerDate = <?= json_encode($data['center_date']) ?>;
         }
         params.filters = <?= json_encode($data['filters']) ?>;
+        console.log("PARAMS_FILTERSSSSSSSS "+params.filters);
 
         oTimeline.loadTimeline(
             'timeline-<?= $block->id() ?>',

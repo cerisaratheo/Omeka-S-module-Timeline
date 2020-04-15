@@ -164,7 +164,6 @@ function test1() {
 
 
 function setupFilterHighlightControls(div, timeline, bandIndices, theme, params) {
-  console.log("pokjnhikjnjijnijijkio "+params.filters);
   var table = document.createElement("table");
   var tr = table.insertRow(0);
 
@@ -183,6 +182,27 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme, params)
   */
 };
 
+console.log("pokjnhikjnjijnijijkio "+params.filters);
+var words = params.filters.split(';');
+
+for (var i=words.length-1; i>=0; i--) {
+  j=1;
+  tr = table.insertRow(j);
+  td = tr.insertCell(0);
+  var ckb = document.createElement("input");
+  ckb.setAttribute("type", "checkbox");
+  ckb.setAttribute("id", "ckb");
+  td.appendChild(ckb);
+  td = tr.insertCell(1);
+  var input = document.createElement("label");
+  input.setAttribute("for", "ckb");
+  var t = document.createTextNode(words[i]);
+  input.appendChild(t);
+  td.appendChild(input);
+  SimileAjax.DOM.registerEvent(ckb, "change", handler);
+  j++;
+}
+/*
 tr = table.insertRow(1);
 //tr.style.verticalAlign = "top";
 
@@ -217,7 +237,7 @@ var t1 = document.createTextNode("école");
 input1.appendChild(t1);
 td.appendChild(input1);
 SimileAjax.DOM.registerEvent(ckb1, "change", handler);
-
+*/
 /*
 input.type = "text";
 SimileAjax.DOM.registerEvent(input, "keypress", handler);

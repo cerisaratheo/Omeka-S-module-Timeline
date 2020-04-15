@@ -139,10 +139,13 @@ class TimelineFieldset extends Fieldset
 
             ->add([
                 'name' => 'o:block[__blockIndex__][o:data][filters]',
-                'type' => Element\Text::class,
+                'type' => Element\Textarea::class,
                 'options' => [
                     'label' => 'Filters', // @translate
-                    'info' => '.', // @translate
+                    'info' => 'Add some filters under the timeline (separed by a semicolon (e.g. word1;word2)).', // @translate
+                ],
+                'attributes' => [
+                    'rows' => 2,
                 ],
             ]);
     }
