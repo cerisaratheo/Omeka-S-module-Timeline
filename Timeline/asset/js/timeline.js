@@ -138,7 +138,7 @@ var oTimeline = {
         tl.getBand(0).setCenterVisibleDate(parsedDate);
       }
     });
-    setupFilterHighlightControls(document.getElementById("filters"), window.tl, [0,1], Timeline.ClassicTheme.create(), params);
+    setupFilterHighlightControls(window.tl, [0,1], Timeline.ClassicTheme.create(), params);
   }
 };
 
@@ -163,18 +163,22 @@ function test1() {
 
 
 
-function setupFilterHighlightControls(div, timeline, bandIndices, theme, params) {
-  var table = document.createElement("table");
-  var tr = table.insertRow(0);
+function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
+  var tablelabels = document.createElement("table");
+  var tableflt = document.createElement("table");
+  var divlabels = document.getElementById("fltLabelsButton");
+  var divflt = document.getElementById("ckbfilters");
+  var tr = tablelabels.insertRow(0);
 
   var td = tr.insertCell(0);
+  td.style.borderBottomStyle = "none";
   td.innerHTML = "Filters :";
   /*
   td = tr.insertCell(1);
   td.innerHTML = "Highlight:";
   */
   var handler = function(elmt, evt, target) {
-    onKeyPress(timeline, bandIndices, table);
+    onKeyPress(timeline, bandIndices, tableflt);
     /*
     else {
     clearAll(timeline, bandIndices, table);
@@ -182,26 +186,28 @@ function setupFilterHighlightControls(div, timeline, bandIndices, theme, params)
   */
 };
 
-console.log("pokjnhikjnjijnijijkio "+params.filters);
 var words = params.filters.split(';');
-
-for (var i=words.length-1; i>=0; i--) {
-  j=1;
-  tr = table.insertRow(j);
-  td = tr.insertCell(0);
-  var ckb = document.createElement("input");
-  ckb.setAttribute("type", "checkbox");
-  ckb.setAttribute("id", "ckb");
-  td.appendChild(ckb);
-  td = tr.insertCell(1);
-  var input = document.createElement("label");
-  input.setAttribute("for", "ckb");
-  var t = document.createTextNode(words[i]);
-  input.appendChild(t);
-  td.appendChild(input);
-  SimileAjax.DOM.registerEvent(ckb, "change", handler);
-  j++;
+if (words.length>=1 && words[0] != "" && words[0] != " ") {
+  for (var i=words.length-1; i>=0; i--) {
+    tr = tableflt.insertRow(0);
+    td = tr.insertCell(0);
+    var ckb = document.createElement("input");
+    var ckbid = "ckb"+i;
+    ckb.setAttribute("type", "checkbox");
+    ckb.setAttribute("id", ckbid);
+    td.appendChild(ckb);
+    td.style.borderBottomStyle = "none";
+    td = tr.insertCell(1);
+    var input = document.createElement("label");
+    input.setAttribute("for", ckbid);
+    var t = document.createTextNode(words[i]);
+    input.appendChild(t);
+    td.appendChild(input);
+    SimileAjax.DOM.registerEvent(ckb, "change", handler);
+    td.style.borderBottomStyle = "none";
+  }
 }
+
 /*
 tr = table.insertRow(1);
 //tr.style.verticalAlign = "top";
@@ -258,17 +264,19 @@ td.appendChild(divColor);
 }
 */
 
-tr = table.insertRow(1);
+tr = tablelabels.insertRow(1);
 
 td = tr.insertCell(tr.cells.length);
+td.style.borderBottomStyle = "none";
 var button = document.createElement("button");
 button.innerHTML = "Clear All";
 SimileAjax.DOM.registerEvent(button, "click", function() {
-  clearAll(timeline, bandIndices, table);
+  clearAll(timeline, bandIndices, tableflt);
 });
 td.appendChild(button);
 
-div.appendChild(table);
+divlabels.appendChild(tablelabels);
+divflt.appendChild(tableflt);
 }
 
 function onKeyPress(timeline, bandIndices, table) {
@@ -279,7 +287,7 @@ function cleanString(s) {
 }
 function performFiltering(timeline, bandIndices, table) {
   var list=[];
-  for(var i=2;i<table.rows.length; i++) {
+  for(var i=0;i<table.rows.length; i++) {
     var tr = table.rows[i];
     if (tr.cells[0].firstChild.checked) {
       var text = cleanString(tr.cells[1].firstChild.innerText);

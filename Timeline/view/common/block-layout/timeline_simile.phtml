@@ -19,7 +19,6 @@ $escape = $this->plugin('escapeHtml');
             params.centerDate = <?= json_encode($data['center_date']) ?>;
         }
         params.filters = <?= json_encode($data['filters']) ?>;
-        console.log("PARAMS_FILTERSSSSSSSS "+params.filters);
 
         oTimeline.loadTimeline(
             'timeline-<?= $block->id() ?>',
@@ -29,5 +28,6 @@ $escape = $this->plugin('escapeHtml');
     });
 </script>
 <div class="filters" id="filters">
+  <div class="fltLabelsButton" id="fltLabelsButton"></div>
   <div class="ckbfilters" id="ckbfilters"></div>
 </div>

@@ -142,7 +142,7 @@ class TimelineFieldset extends Fieldset
                 'type' => Element\Textarea::class,
                 'options' => [
                     'label' => 'Filters', // @translate
-                    'info' => 'Add some filters under the timeline (separed by a semicolon (e.g. word1;word2)).', // @translate
+                    'info' => 'Add some filters under the timeline (separated with a semicolon e.g. word1;word2).', // @translate
                 ],
                 'attributes' => [
                     'rows' => 2,
