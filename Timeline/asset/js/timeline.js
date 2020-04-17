@@ -156,11 +156,36 @@ function test1() {
 
 //
 //
-// FONCTIONS IMPORTÉES DU MODULE SIMILE
+// FILTRES
 //
 //
 
 
+function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handler) {
+  var tr = table.insertRow(2);
+  var td = tr.insertCell(0);
+  td.style.borderBottomStyle = "none";
+
+  var input = document.createElement("input");
+  input.type = "text";
+  SimileAjax.DOM.registerEvent(input, "keypress", handler);
+  td.appendChild(input);
+
+  for (var i = 0; i < theme.event.highlightColors.length; i++) {
+    td = tr.insertCell(i+1);
+    td.style.borderBottomStyle = "none";
+
+    input = document.createElement("input");
+    input.type = "text";
+    SimileAjax.DOM.registerEvent(input, "keypress", handler);
+    td.appendChild(input);
+
+    var divColor = document.createElement("div");
+    divColor.style.height = "0.5em";
+    divColor.style.background = theme.event.highlightColors[i];
+    td.appendChild(divColor);
+  }
+}
 
 
 function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
@@ -168,91 +193,167 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
   var tableflt = document.createElement("table");
   var divlabels = document.getElementById("fltLabelsButton");
   var divflt = document.getElementById("ckbfilters");
+
   var tr = tablelabels.insertRow(0);
-
-  var td = tr.insertCell(0);
+  var td = tr.insertCell(tr.cells.length);
   td.style.borderBottomStyle = "none";
-  td.innerHTML = "Filters :";
-  /*
-  td = tr.insertCell(1);
-  td.innerHTML = "Highlight:";
-  */
-  var handler = function(elmt, evt, target) {
-    onKeyPress(timeline, bandIndices, tableflt);
-    /*
-    else {
-    clearAll(timeline, bandIndices, table);
-  }
-  */
-};
+  var button = document.createElement("button");
+  button.innerHTML = "Clear All";
+  SimileAjax.DOM.registerEvent(button, "click", function() {
+    clearAllCkb(timeline, bandIndices, tableflt);
+    clearAllInputs(timeline, bandIndices, tablelabels);
+  });
+  td.appendChild(button);
 
-var words = params.filters.split(';');
-if (words[words.length-1] === "" || words[words.length-1] === " ") {
-  words.splice(words.length-1, 1);
-}
-if (words.length>=1 && words[0] != "" && words[0] != " ") {
-  for (var i=words.length-1; i>=0; i--) {
-    tr = tableflt.insertRow(0);
+  divlabels.appendChild(tablelabels);
+  divflt.appendChild(tableflt);
+
+
+  var handlerCkb = function(elmt, evt, target) {
+      onCheck(timeline, bandIndices, tableflt);
+  };
+
+  var handlerInputs = function(elmt, evt, target) {
+      onKeyPress(timeline, bandIndices, tablelabels);
+  }
+
+  if (params.userFilters === '0') {
+    tr = tablelabels.insertRow(1);
     td = tr.insertCell(0);
-    var ckb = document.createElement("input");
-    var ckbid = "ckb"+i;
-    ckb.setAttribute("type", "checkbox");
-    ckb.setAttribute("id", ckbid);
-    td.appendChild(ckb);
     td.style.borderBottomStyle = "none";
+    td.innerHTML = "Filter :";
+
     td = tr.insertCell(1);
-    var input = document.createElement("label");
-    input.setAttribute("for", ckbid);
-    var t = document.createTextNode(words[i]);
-    input.appendChild(t);
-    td.appendChild(input);
-    SimileAjax.DOM.registerEvent(ckb, "change", handler);
     td.style.borderBottomStyle = "none";
+    td.innerHTML = "Highlight:";
+    setupInputFiltersHighlights(timeline, bandIndices, theme, tablelabels, handlerInputs);
+  }
+
+  var words = params.filters.split(';');
+  if (words[words.length-1] === "" || words[words.length-1] === " ") {
+    words.splice(words.length-1, 1);
+  }
+  if (words.length>=1 && words[0] != "" && words[0] != " ") {
+    for (var i=words.length-1; i>=0; i--) {
+      tr = tableflt.insertRow(0);
+      td = tr.insertCell(0);
+      var ckb = document.createElement("input");
+      var ckbid = "ckb"+i;
+      ckb.setAttribute("type", "checkbox");
+      ckb.setAttribute("id", ckbid);
+      td.appendChild(ckb);
+      td.style.borderBottomStyle = "none";
+      td = tr.insertCell(1);
+      var input = document.createElement("label");
+      input.setAttribute("for", ckbid);
+      var t = document.createTextNode(words[i]);
+      input.appendChild(t);
+      td.appendChild(input);
+      SimileAjax.DOM.registerEvent(ckb, "change", handlerCkb);
+      td.style.borderBottomStyle = "none";
+    }
   }
 }
 
-/*
-input.type = "text";
-SimileAjax.DOM.registerEvent(input, "keypress", handler);
-td.appendChild(input);
 
-for (var i = 0; i < theme.event.highlightColors.length; i++) {
-td = tr.insertCell(i + 1);
-
-input = document.createElement("input");
-input.type = "text";
-SimileAjax.DOM.registerEvent(input, "keypress", handler);
-td.appendChild(input);
-
-var divColor = document.createElement("div");
-divColor.style.height = "0.5em";
-divColor.style.background = theme.event.highlightColors[i];
-td.appendChild(divColor);
-}
-*/
-
-tr = tablelabels.insertRow(1);
-
-td = tr.insertCell(tr.cells.length);
-td.style.borderBottomStyle = "none";
-var button = document.createElement("button");
-button.innerHTML = "Clear All";
-SimileAjax.DOM.registerEvent(button, "click", function() {
-  clearAll(timeline, bandIndices, tableflt);
-});
-td.appendChild(button);
-
-divlabels.appendChild(tablelabels);
-divflt.appendChild(tableflt);
-}
-
-function onKeyPress(timeline, bandIndices, table) {
-  performFiltering(timeline, bandIndices, table);
-}
 function cleanString(s) {
   return s.replace(/^\s+/, '').replace(/\s+$/, '');
 }
-function performFiltering(timeline, bandIndices, table) {
+
+
+
+//
+//
+// FILTRAGE DES INPUTS
+//
+//
+
+
+var timerID = null;
+function onKeyPress(timeline, bandIndices, table) {
+  console.log("onKeyPress " +table)
+    if (timerID != null) {
+        window.clearTimeout(timerID);
+    }
+    timerID = window.setTimeout(function() {
+        performFilteringInputs(timeline, bandIndices, table);
+    }, 300);
+}
+
+function performFilteringInputs(timeline, bandIndices, table) {
+    timerID = null;
+
+    var tr = table.rows[2];
+    var text = cleanString(tr.cells[0].firstChild.value);
+
+    var filterMatcher = null;
+    if (text.length > 0) {
+        var regex = new RegExp(text, "i");
+        filterMatcher = function(evt) {
+            return regex.test(evt.getText()) || regex.test(evt.getDescription());
+        };
+    }
+
+    var regexes = [];
+    var hasHighlights = false;
+    for (var x = 1; x < tr.cells.length; x++) {
+        var input = tr.cells[x].firstChild;
+        var text2 = cleanString(input.value);
+        if (text2.length > 0) {
+            hasHighlights = true;
+            regexes.push(new RegExp(text2, "i"));
+        } else {
+            regexes.push(null);
+        }
+    }
+    var highlightMatcher = hasHighlights ? function(evt) {
+        var text = evt.getText();
+        var description = evt.getDescription();
+        for (var x = 0; x < regexes.length; x++) {
+            var regex = regexes[x];
+            if (regex != null && (regex.test(text) || regex.test(description))) {
+                return x;
+            }
+        }
+        return -1;
+    } : null;
+
+    for (var i = 0; i < bandIndices.length; i++) {
+        var bandIndex = bandIndices[i];
+        timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
+        timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
+    }
+    timeline.paint();
+}
+
+function clearAllInputs(timeline, bandIndices, table) {
+    var tr = table.rows[2];
+    for (var x = 0; x < tr.cells.length; x++) {
+        tr.cells[x].firstChild.value = "";
+    }
+
+    for (var i = 0; i < bandIndices.length; i++) {
+        var bandIndex = bandIndices[i];
+        timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(null);
+        timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(null);
+    }
+    timeline.paint();
+}
+
+
+
+//
+//
+// FILTRAGE DES CHECKBOXES
+//
+//
+
+
+function onCheck(timeline, bandIndices, table) {
+  performFilteringCkb(timeline, bandIndices, table);
+}
+
+function performFilteringCkb(timeline, bandIndices, table) {
   var list=[];
   for(var i=0;i<table.rows.length; i++) {
     var tr = table.rows[i];
@@ -265,7 +366,7 @@ function performFiltering(timeline, bandIndices, table) {
     }
   }
   if (list.length===0) {
-    clearAll(timeline, bandIndices, table);
+    clearAllCkb(timeline, bandIndices, table);
     return;
   }
   var filterMatcher = function(evt) {
@@ -277,39 +378,40 @@ function performFiltering(timeline, bandIndices, table) {
     }
     return false;
   };
-  /*
+
   var regexes = [];
   var hasHighlights = false;
   for (var x = 1; x < tr.cells.length - 1; x++) {
-  var input = tr.cells[x].firstChild;
-  var text2 = cleanString(input.value);
-  if (text2.length > 0) {
-  hasHighlights = true;
-  regexes.push(new RegExp(text2, "i"));
-} else {
-regexes.push(null);
-}
-}
-var highlightMatcher = hasHighlights ? function(evt) {
-var text = evt.getText();
-var description = evt.getDescription();
-for (var x = 0; x < regexes.length; x++) {
-var regex = regexes[x];
-if (regex != null && (regex.test(text) || regex.test(description))) {
-return x;
-}
-}
-return -1;
-} : null;
-*/
-for (var i = 0; i < bandIndices.length; i++) {
-  var bandIndex = bandIndices[i];
-  timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
-  // timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
+    var input = tr.cells[x].firstChild;
+    var text2 = cleanString(input.value);
+    if (text2.length > 0) {
+      hasHighlights = true;
+      regexes.push(new RegExp(text2, "i"));
+    } else {
+      regexes.push(null);
+    }
+  }
+  var highlightMatcher = hasHighlights ? function(evt) {
+    var text = evt.getText();
+    var description = evt.getDescription();
+    for (var x = 0; x < regexes.length; x++) {
+      var regex = regexes[x];
+      if (regex != null && (regex.test(text) || regex.test(description))) {
+        return x;
+      }
+    }
+    return -1;
+  } : null;
+
+  for (var i = 0; i < bandIndices.length; i++) {
+    var bandIndex = bandIndices[i];
+    timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
+    timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
 }
 timeline.paint();
 }
-function clearAll(timeline, bandIndices, table) {
+
+function clearAllCkb(timeline, bandIndices, table) {
   for (var i=0; i<table.rows.length; i++) {
     var tr = table.rows[i];
     tr.cells[0].firstChild.checked=false;
