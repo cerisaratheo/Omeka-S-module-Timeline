@@ -187,6 +187,9 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
 };
 
 var words = params.filters.split(';');
+if (words[words.length-1] === "" || words[words.length-1] === " ") {
+  words.splice(words.length-1, 1);
+}
 if (words.length>=1 && words[0] != "" && words[0] != " ") {
   for (var i=words.length-1; i>=0; i--) {
     tr = tableflt.insertRow(0);
@@ -208,42 +211,6 @@ if (words.length>=1 && words[0] != "" && words[0] != " ") {
   }
 }
 
-/*
-tr = table.insertRow(1);
-//tr.style.verticalAlign = "top";
-
-td = tr.insertCell(0);
-var ckb = document.createElement("input");
-ckb.setAttribute("type", "checkbox");
-ckb.setAttribute("id", "ckb");
-td.appendChild(ckb);
-
-td = tr.insertCell(1);
-var input = document.createElement("label");
-input.setAttribute("for", "ckb");
-var t = document.createTextNode("thèses");
-input.appendChild(t);
-td.appendChild(input);
-SimileAjax.DOM.registerEvent(ckb, "change", handler);
-
-tr = table.insertRow(2);
-//tr.style.verticalAlign = "top";
-
-td = tr.insertCell(0);
-
-var ckb1 = document.createElement("input");
-ckb1.setAttribute("type", "checkbox");
-ckb1.setAttribute("id", "ckb1");
-td.appendChild(ckb1);
-
-td = tr.insertCell(1);
-var input1 = document.createElement("label");
-input1.setAttribute("for", "ckb1");
-var t1 = document.createTextNode("école");
-input1.appendChild(t1);
-td.appendChild(input1);
-SimileAjax.DOM.registerEvent(ckb1, "change", handler);
-*/
 /*
 input.type = "text";
 SimileAjax.DOM.registerEvent(input, "keypress", handler);
