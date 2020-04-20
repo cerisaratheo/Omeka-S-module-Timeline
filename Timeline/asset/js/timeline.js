@@ -210,11 +210,11 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
 
 
   var handlerCkb = function(elmt, evt, target) {
-      onCheck(timeline, bandIndices, tableflt);
+    onCheck(timeline, bandIndices, tableflt);
   };
 
   var handlerInputs = function(elmt, evt, target) {
-      onKeyPress(timeline, bandIndices, tablelabels);
+    onKeyPress(timeline, bandIndices, tablelabels);
   }
 
   if (params.userFilters === '0') {
@@ -271,73 +271,72 @@ function cleanString(s) {
 
 var timerID = null;
 function onKeyPress(timeline, bandIndices, table) {
-  console.log("onKeyPress " +table)
-    if (timerID != null) {
-        window.clearTimeout(timerID);
-    }
-    timerID = window.setTimeout(function() {
-        performFilteringInputs(timeline, bandIndices, table);
-    }, 300);
+  if (timerID != null) {
+    window.clearTimeout(timerID);
+  }
+  timerID = window.setTimeout(function() {
+    performFilteringInputs(timeline, bandIndices, table);
+  }, 300);
 }
 
 function performFilteringInputs(timeline, bandIndices, table) {
-    timerID = null;
+  timerID = null;
 
-    var tr = table.rows[2];
-    var text = cleanString(tr.cells[0].firstChild.value);
+  var tr = table.rows[2];
+  var text = cleanString(tr.cells[0].firstChild.value);
 
-    var filterMatcher = null;
-    if (text.length > 0) {
-        var regex = new RegExp(text, "i");
-        filterMatcher = function(evt) {
-            return regex.test(evt.getText()) || regex.test(evt.getDescription());
-        };
+  var filterMatcher = null;
+  if (text.length > 0) {
+    var regex = new RegExp(text, "i");
+    filterMatcher = function(evt) {
+      return regex.test(evt.getText()) || regex.test(evt.getDescription());
+    };
+  }
+
+  var regexes = [];
+  var hasHighlights = false;
+  for (var x = 1; x < tr.cells.length; x++) {
+    var input = tr.cells[x].firstChild;
+    var text2 = cleanString(input.value);
+    if (text2.length > 0) {
+      hasHighlights = true;
+      regexes.push(new RegExp(text2, "i"));
+    } else {
+      regexes.push(null);
     }
-
-    var regexes = [];
-    var hasHighlights = false;
-    for (var x = 1; x < tr.cells.length; x++) {
-        var input = tr.cells[x].firstChild;
-        var text2 = cleanString(input.value);
-        if (text2.length > 0) {
-            hasHighlights = true;
-            regexes.push(new RegExp(text2, "i"));
-        } else {
-            regexes.push(null);
-        }
+  }
+  var highlightMatcher = hasHighlights ? function(evt) {
+    var text = evt.getText();
+    var description = evt.getDescription();
+    for (var x = 0; x < regexes.length; x++) {
+      var regex = regexes[x];
+      if (regex != null && (regex.test(text) || regex.test(description))) {
+        return x;
+      }
     }
-    var highlightMatcher = hasHighlights ? function(evt) {
-        var text = evt.getText();
-        var description = evt.getDescription();
-        for (var x = 0; x < regexes.length; x++) {
-            var regex = regexes[x];
-            if (regex != null && (regex.test(text) || regex.test(description))) {
-                return x;
-            }
-        }
-        return -1;
-    } : null;
+    return -1;
+  } : null;
 
-    for (var i = 0; i < bandIndices.length; i++) {
-        var bandIndex = bandIndices[i];
-        timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
-        timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
-    }
-    timeline.paint();
+  for (var i = 0; i < bandIndices.length; i++) {
+    var bandIndex = bandIndices[i];
+    timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
+    timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
+  }
+  timeline.paint();
 }
 
 function clearAllInputs(timeline, bandIndices, table) {
-    var tr = table.rows[2];
-    for (var x = 0; x < tr.cells.length; x++) {
-        tr.cells[x].firstChild.value = "";
-    }
+  var tr = table.rows[2];
+  for (var x = 0; x < tr.cells.length; x++) {
+    tr.cells[x].firstChild.value = "";
+  }
 
-    for (var i = 0; i < bandIndices.length; i++) {
-        var bandIndex = bandIndices[i];
-        timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(null);
-        timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(null);
-    }
-    timeline.paint();
+  for (var i = 0; i < bandIndices.length; i++) {
+    var bandIndex = bandIndices[i];
+    timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(null);
+    timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(null);
+  }
+  timeline.paint();
 }
 
 
@@ -379,36 +378,11 @@ function performFilteringCkb(timeline, bandIndices, table) {
     return false;
   };
 
-  var regexes = [];
-  var hasHighlights = false;
-  for (var x = 1; x < tr.cells.length - 1; x++) {
-    var input = tr.cells[x].firstChild;
-    var text2 = cleanString(input.value);
-    if (text2.length > 0) {
-      hasHighlights = true;
-      regexes.push(new RegExp(text2, "i"));
-    } else {
-      regexes.push(null);
-    }
-  }
-  var highlightMatcher = hasHighlights ? function(evt) {
-    var text = evt.getText();
-    var description = evt.getDescription();
-    for (var x = 0; x < regexes.length; x++) {
-      var regex = regexes[x];
-      if (regex != null && (regex.test(text) || regex.test(description))) {
-        return x;
-      }
-    }
-    return -1;
-  } : null;
-
   for (var i = 0; i < bandIndices.length; i++) {
     var bandIndex = bandIndices[i];
     timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
-    timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
-}
-timeline.paint();
+  }
+  timeline.paint();
 }
 
 function clearAllCkb(timeline, bandIndices, table) {
@@ -419,7 +393,6 @@ function clearAllCkb(timeline, bandIndices, table) {
   for (var i = 0; i < bandIndices.length; i++) {
     var bandIndex = bandIndices[i];
     timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(null);
-    timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(null);
   }
   timeline.paint();
 }
