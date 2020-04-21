@@ -142,15 +142,6 @@ var oTimeline = {
   }
 };
 
-function test1() {
-  var tl = window.tl;
-  var parsedDate = Timeline.DateTime.parseGregorianDateTime("1880-01-01");
-  tl.getBand(0).setCenterVisibleDate(parsedDate);
-};
-
-
-
-
 
 
 
@@ -168,7 +159,7 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 
   var input = document.createElement("input");
   input.type = "text";
-  SimileAjax.DOM.registerEvent(input, "keypress", handler);
+  SimileAjax.DOM.registerEvent(input, "keydown", handler);
   td.appendChild(input);
 
   for (var i = 0; i < theme.event.highlightColors.length; i++) {
@@ -177,7 +168,7 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 
     input = document.createElement("input");
     input.type = "text";
-    SimileAjax.DOM.registerEvent(input, "keypress", handler);
+    SimileAjax.DOM.registerEvent(input, "keydown", handler);
     td.appendChild(input);
 
     var divColor = document.createElement("div");
@@ -200,7 +191,7 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
   var button = document.createElement("button");
   button.innerHTML = "Clear All";
   SimileAjax.DOM.registerEvent(button, "click", function() {
-    clearAllCkb(timeline, bandIndices, tableflt);
+    clearAllCkb(timeline, bandIndices, tableflt, false);
     clearAllInputs(timeline, bandIndices, tablelabels);
   });
   td.appendChild(button);
@@ -285,12 +276,28 @@ function performFilteringInputs(timeline, bandIndices, table) {
   var tr = table.rows[2];
   var text = cleanString(tr.cells[0].firstChild.value);
 
-  var filterMatcher = null;
+  window.regexpfilter = null;
   if (text.length > 0) {
-    var regex = new RegExp(text, "i");
-    filterMatcher = function(evt) {
-      return regex.test(evt.getText()) || regex.test(evt.getDescription());
-    };
+    window.regexpfilter = text;
+  }
+  else {
+    window.regexpfilter = null;
+  }
+  var filterMatcher = function(evt) {
+      if (window.regexpfilter==null && window.regexpckb.length==0) return true;
+      if (typeof window.regexpckb !== 'undefined') {
+      for (var i=0; i<window.regexpckb.length; i++) {
+        var regex = new RegExp(window.regexpckb[i], "i");
+        if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+          return true;
+        }
+      }
+    }
+      if (window.regexpfilter==null) return false;
+      {
+        var regex = new RegExp(window.regexpfilter, "i");
+        return regex.test(evt.getText()) || regex.test(evt.getDescription());
+      }
   }
 
   var regexes = [];
@@ -326,6 +333,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
 }
 
 function clearAllInputs(timeline, bandIndices, table) {
+  window.regexpfilter = null;
   var tr = table.rows[2];
   for (var x = 0; x < tr.cells.length; x++) {
     tr.cells[x].firstChild.value = "";
@@ -365,18 +373,27 @@ function performFilteringCkb(timeline, bandIndices, table) {
     }
   }
   if (list.length===0) {
-    clearAllCkb(timeline, bandIndices, table);
+    clearAllCkb(timeline, bandIndices, table, true);
     return;
   }
+  window.regexpckb = [];
+  for (var i=0; i<list.length; i++) {
+    window.regexpckb.push(list[i]);
+  }
   var filterMatcher = function(evt) {
-    for (var i=0; i<list.length; i++) {
-      var regex = new RegExp(list[i], "i");
-      if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
-        return true;
+      if (window.regexpfilter==null && window.regexpckb.length==0) return true;
+      for (var i=0; i<window.regexpckb.length; i++) {
+        var regex = new RegExp(window.regexpckb[i], "i");
+        if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+          return true;
+        }
       }
-    }
-    return false;
-  };
+      if (window.regexpfilter==null) return false;
+      {
+        var regex = new RegExp(window.regexpfilter, "i");
+        return regex.test(evt.getText()) || regex.test(evt.getDescription());
+      }
+  }
 
   for (var i = 0; i < bandIndices.length; i++) {
     var bandIndex = bandIndices[i];
@@ -385,14 +402,37 @@ function performFilteringCkb(timeline, bandIndices, table) {
   timeline.paint();
 }
 
-function clearAllCkb(timeline, bandIndices, table) {
+function clearAllCkb(timeline, bandIndices, table, createfilt) {
   for (var i=0; i<table.rows.length; i++) {
     var tr = table.rows[i];
     tr.cells[0].firstChild.checked=false;
   }
-  for (var i = 0; i < bandIndices.length; i++) {
-    var bandIndex = bandIndices[i];
-    timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(null);
+  window.regexpckb = [];
+  if (!createfilt) {
+
+
+    var filterMatcher = function(evt) {
+      if (window.regexpfilter==null) return true;
+      var regex = new RegExp(window.regexpfilter, "i");
+      return regex.test(evt.getText()) || regex.test(evt.getDescription());
+    }
+
+    for (var i = 0; i < bandIndices.length; i++) {
+      var bandIndex = bandIndices[i];
+      timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(null);
+    }
   }
   timeline.paint();
 }
+
+
+
+//
+//
+// TIMELINE FULL PAGE MODE
+//
+//
+/*
+function enableFullPage() {
+}
+*/
