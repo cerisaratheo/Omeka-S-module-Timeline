@@ -432,7 +432,31 @@ function clearAllCkb(timeline, bandIndices, table, createfilt) {
 // TIMELINE FULL PAGE MODE
 //
 //
-/*
+
 function enableFullPage() {
+  document.getElementById("user-bar").style.display = "none";
+  document.getElementsByTagName("header")[0].style.display = "none";
+  document.getElementsByTagName("footer")[0].style.display = "none";
+  var b = document.getElementsByClassName("blocks")[0].children;
+  for (var i=0; i<b.length; i++) {
+    var fw = [];
+    fw = b[i].className.split(" ");
+    if (fw[0] != "timeline" && b[i].tagName != "SCRIPT") {
+      b[i].style.display = "none";
+    }
+  }
 }
-*/
+
+function disableFullPage() {
+  document.getElementById("user-bar").style.display = "block";
+  document.getElementsByTagName("header")[0].style.display = "block";
+  document.getElementsByTagName("footer")[0].style.display = "block";
+  var b = document.getElementsByClassName("blocks")[0].children;
+  for (var i=0; i<b.length; i++) {
+    var fw = [];
+    fw = b[i].className.split(" ");
+    if (fw[0] != "timeline" && b[i].tagName != "SCRIPT") {
+      b[i].style.display = "block";
+    }
+  }
+}
