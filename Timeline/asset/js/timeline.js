@@ -437,12 +437,34 @@ function enableFullPage() {
   document.getElementById("user-bar").style.display = "none";
   document.getElementsByTagName("header")[0].style.display = "none";
   document.getElementsByTagName("footer")[0].style.display = "none";
+  window.contentPadding = document.getElementById("content").style.padding;
+  document.getElementById("content").style.padding = "0";
   var b = document.getElementsByClassName("blocks")[0].children;
   for (var i=0; i<b.length; i++) {
     var fw = [];
     fw = b[i].className.split(" ");
     if (fw[0] != "timeline" && b[i].tagName != "SCRIPT") {
       b[i].style.display = "none";
+    }
+    if (fw[0] === "timeline") {
+      window.cadreExtMargin = b[i].style.margin;
+      b[i].style.margin = "0";
+      window.cadreExtPadding = b[i].style.padding;
+      b[i].style.padding = "0";
+      window.cadreExtHeight = b[i].style.height;
+      b[i].style.height = "100vh";
+      window.cadreExtWidth = b[i].style.width;
+      b[i].style.width = "100vw";
+      window.tlHautHeight = b[i].children[2].style.height;
+      b[i].children[2].style.height = "85vh";
+      window.tlHautPos = b[i].children[2].style.position;
+      b[i].children[2].style.position = "relative";
+      window.tlBasTop = b[i].children[4].style.top;
+      b[i].children[4].style.top = "0";
+      window.tlBasHeight = b[i].children[4].style.height;
+      b[i].children[4].style.height = "15vh";
+      window.tlBasPos = b[i].children[4].style.position;
+      b[i].children[4].style.position = "relative";
     }
   }
 }
@@ -451,12 +473,24 @@ function disableFullPage() {
   document.getElementById("user-bar").style.display = "block";
   document.getElementsByTagName("header")[0].style.display = "block";
   document.getElementsByTagName("footer")[0].style.display = "block";
+  document.getElementById("content").style.padding = window.contentPadding;
   var b = document.getElementsByClassName("blocks")[0].children;
   for (var i=0; i<b.length; i++) {
     var fw = [];
     fw = b[i].className.split(" ");
     if (fw[0] != "timeline" && b[i].tagName != "SCRIPT") {
       b[i].style.display = "block";
+    }
+    if (fw[0] === "timeline") {
+      b[i].style.margin = window.cadreExtMargin;
+      b[i].style.padding = window.cadreExtPadding;
+      b[i].style.height = window.cadreExtHeight;
+      b[i].style.width = window.cadreExtWidth;
+      b[i].children[2].style.height = window.tlHautHeight;
+      b[i].children[2].style.position = window.tlHautPos;
+      b[i].children[4].style.top = window.tlBasTop;
+      b[i].children[4].style.height = window.tlBasHeight;
+      b[i].children[4].style.position = window.tlBasPos;
     }
   }
 }
