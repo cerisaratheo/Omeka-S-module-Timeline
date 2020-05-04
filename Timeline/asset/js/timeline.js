@@ -116,6 +116,7 @@ var oTimeline = {
 
     var tl = Timeline.create(document.getElementById(timelineId), bandInfos);
     window.tl = tl;
+    window.tlid = timelineId;
     tl.loadJSON(timelineData, function(json, url) {
       // log the timelineData, and see what's there
       // figure out what's creating the timelineData json
@@ -139,10 +140,32 @@ var oTimeline = {
       }
     });
     setupFilterHighlightControls(window.tl, [0,1], Timeline.ClassicTheme.create(), params);
+    addFullPageButton(window.tlid);
   }
 };
 
 
+function addFullPageButton(timelineId) {
+  if (window.divfp != null) {
+    console.log("avant add "+window.divfp.id);
+    window.divfp.parentNode.removeChild(window.divfp);
+    console.log("après add "+window.divfp);
+  }
+  window.divfp = window.tl.getDocument().createElement("div");
+  window.divfp.className = "fullPage";
+  delete window.fpimg;
+  window.fpimg = document.createElement('img');
+  window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/fullscreen.svg');
+  window.divfp.appendChild(window.fpimg);
+  window.fpimg.style.marginRight="0.15em";
+  window.fpimg.setAttribute('onclick','enableFullPage();'); // for FF
+  window.fpimg.onclick = function() {enableFullPage();}; // for IE
+  window.tl._containerDiv.appendChild(window.divfp);
+  window.divfp.style.position = "relative";
+  window.divfp.style.zIndex="100";
+  window.divfp.style.cssFloat = "right";
+  window.divfp.style.cursor = "pointer";
+}
 
 
 //
@@ -220,7 +243,7 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
     setupInputFiltersHighlights(timeline, bandIndices, theme, tablelabels, handlerInputs);
   }
 
-  var words = params.filters.split(';');
+  var words = params.filters.split('\n');
   if (words[words.length-1] === "" || words[words.length-1] === " ") {
     words.splice(words.length-1, 1);
   }
@@ -284,8 +307,8 @@ function performFilteringInputs(timeline, bandIndices, table) {
     window.regexpfilter = null;
   }
   var filterMatcher = function(evt) {
-      if (window.regexpfilter==null && window.regexpckb.length==0) return true;
-      if (typeof window.regexpckb !== 'undefined') {
+    if (window.regexpfilter==null && window.regexpckb.length==0) return true;
+    if (typeof window.regexpckb !== 'undefined') {
       for (var i=0; i<window.regexpckb.length; i++) {
         var regex = new RegExp(window.regexpckb[i], "i");
         if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
@@ -293,11 +316,11 @@ function performFilteringInputs(timeline, bandIndices, table) {
         }
       }
     }
-      if (window.regexpfilter==null) return false;
-      {
-        var regex = new RegExp(window.regexpfilter, "i");
-        return regex.test(evt.getText()) || regex.test(evt.getDescription());
-      }
+    if (window.regexpfilter==null) return false;
+    {
+      var regex = new RegExp(window.regexpfilter, "i");
+      return regex.test(evt.getText()) || regex.test(evt.getDescription());
+    }
   }
 
   var regexes = [];
@@ -381,18 +404,18 @@ function performFilteringCkb(timeline, bandIndices, table) {
     window.regexpckb.push(list[i]);
   }
   var filterMatcher = function(evt) {
-      if (window.regexpfilter==null && window.regexpckb.length==0) return true;
-      for (var i=0; i<window.regexpckb.length; i++) {
-        var regex = new RegExp(window.regexpckb[i], "i");
-        if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
-          return true;
-        }
+    if (window.regexpfilter==null && window.regexpckb.length==0) return true;
+    for (var i=0; i<window.regexpckb.length; i++) {
+      var regex = new RegExp(window.regexpckb[i], "i");
+      if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+        return true;
       }
-      if (window.regexpfilter==null) return false;
-      {
-        var regex = new RegExp(window.regexpfilter, "i");
-        return regex.test(evt.getText()) || regex.test(evt.getDescription());
-      }
+    }
+    if (window.regexpfilter==null) return false;
+    {
+      var regex = new RegExp(window.regexpfilter, "i");
+      return regex.test(evt.getText()) || regex.test(evt.getDescription());
+    }
   }
 
   for (var i = 0; i < bandIndices.length; i++) {
@@ -439,6 +462,8 @@ function enableFullPage() {
   document.getElementsByTagName("footer")[0].style.display = "none";
   window.contentPadding = document.getElementById("content").style.padding;
   document.getElementById("content").style.padding = "0";
+  window.contentMargin = document.getElementById("content").style.margin;
+  document.getElementById("content").style.margin = "0";
   var b = document.getElementsByClassName("blocks")[0].children;
   for (var i=0; i<b.length; i++) {
     var fw = [];
@@ -467,6 +492,32 @@ function enableFullPage() {
       b[i].children[4].style.position = "relative";
     }
   }
+
+  if (window.divfp != null) {
+    console.log("avant delete "+window.divfp);
+    window.divfp.parentNode.removeChild(window.divfp);
+    console.log("après delete "+window.divfp);
+  }
+  window.divfp = window.tl.getDocument().createElement("div");
+  window.divfp.className = "fullPage";
+  delete window.fpimg;
+  console.log(window.fpimg);
+  window.fpimg = document.createElement('img');
+  console.log(window.fpimg);
+  window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/exit-fullscreen.svg');
+  window.divfp.appendChild(window.fpimg);
+  window.fpimg.style.marginRight="0.15em";
+  window.fpimg.setAttribute('onclick','disableFullPage();'); // for FF
+  window.fpimg.onclick = function() {disableFullPage();}; // for IE
+  window.tl._containerDiv.appendChild(window.divfp);
+  window.divfp.style.position = "relative";
+  window.divfp.style.zIndex="100";
+  window.divfp.style.float = "right";
+  window.divfp.style.bottom = "100%"
+  //window.divfp.style.right = "0";
+  //window.divfp.style.top = "0";
+  window.divfp.style.cursor = "pointer";
+  i
 }
 
 function disableFullPage() {
@@ -474,6 +525,7 @@ function disableFullPage() {
   document.getElementsByTagName("header")[0].style.display = "block";
   document.getElementsByTagName("footer")[0].style.display = "block";
   document.getElementById("content").style.padding = window.contentPadding;
+  document.getElementById("content").style.margin = window.contentMargin;
   var b = document.getElementsByClassName("blocks")[0].children;
   for (var i=0; i<b.length; i++) {
     var fw = [];
@@ -493,4 +545,5 @@ function disableFullPage() {
       b[i].children[4].style.position = window.tlBasPos;
     }
   }
+  addFullPageButton(window.tlid);
 }
