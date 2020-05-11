@@ -123,6 +123,7 @@ var oTimeline = {
       // console.log("json: ", json);
       // console.log("timelineData: ", timelineData);
       if (json.events.length > 0) {
+        //console.log(" EVENTS  "+json.events[0]);
         eventSource.loadJSON(json, url);
         var centerDate = params.centerDate;
         // console.log("centerDate: " + centerDate);
@@ -147,23 +148,29 @@ var oTimeline = {
 
 function addFullPageButton(timelineId) {
   if (window.divfp != null) {
-    console.log("avant add "+window.divfp.id);
+    //console.log("avant add "+window.divfp.id);
     window.divfp.parentNode.removeChild(window.divfp);
-    console.log("après add "+window.divfp);
+    //console.log("après add "+window.divfp);
   }
+  //console.log("classNameTimeline "+document.getElementsByClassName("timeline")[0].style.margin);
+  //document.getElementsByClassName("timeline")[0].style.margin = "0";
   window.divfp = window.tl.getDocument().createElement("div");
   window.divfp.className = "fullPage";
   delete window.fpimg;
   window.fpimg = document.createElement('img');
-  window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/fullscreen.svg');
+  window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/fullscreen_white.svg');
   window.divfp.appendChild(window.fpimg);
   window.fpimg.style.marginRight="0.15em";
   window.fpimg.setAttribute('onclick','enableFullPage();'); // for FF
   window.fpimg.onclick = function() {enableFullPage();}; // for IE
   window.tl._containerDiv.appendChild(window.divfp);
-  window.divfp.style.position = "relative";
   window.divfp.style.zIndex="100";
-  window.divfp.style.cssFloat = "right";
+  //window.divfp.style.position = "relative";
+  //window.divfp.style.cssFloat = "right";
+  window.divfp.style.position = "absolute";
+  window.divfp.style.right = "0%";
+  window.divfp.style.bottom = "0%";
+  window.divfp.style.paddingRight = "0.1em";
   window.divfp.style.cursor = "pointer";
 }
 
@@ -176,6 +183,7 @@ function addFullPageButton(timelineId) {
 
 
 function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handler) {
+  window.regexpckb = [];
   var tr = table.insertRow(2);
   var td = tr.insertCell(0);
   td.style.borderBottomStyle = "none";
@@ -311,7 +319,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
     if (typeof window.regexpckb !== 'undefined') {
       for (var i=0; i<window.regexpckb.length; i++) {
         var regex = new RegExp(window.regexpckb[i], "i");
-        if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+        if (regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart())) {
           return true;
         }
       }
@@ -319,7 +327,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
     if (window.regexpfilter==null) return false;
     {
       var regex = new RegExp(window.regexpfilter, "i");
-      return regex.test(evt.getText()) || regex.test(evt.getDescription());
+      return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart());
     }
   }
 
@@ -404,17 +412,19 @@ function performFilteringCkb(timeline, bandIndices, table) {
     window.regexpckb.push(list[i]);
   }
   var filterMatcher = function(evt) {
+    //console.log("   evt     "+Object.values(evt));
+    //console.log("   KEYS    "+Object.keys(evt));
     if (window.regexpfilter==null && window.regexpckb.length==0) return true;
     for (var i=0; i<window.regexpckb.length; i++) {
       var regex = new RegExp(window.regexpckb[i], "i");
-      if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+      if (regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart())) {
         return true;
       }
     }
     if (window.regexpfilter==null) return false;
     {
       var regex = new RegExp(window.regexpfilter, "i");
-      return regex.test(evt.getText()) || regex.test(evt.getDescription());
+      return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart());
     }
   }
 
@@ -494,30 +504,30 @@ function enableFullPage() {
   }
 
   if (window.divfp != null) {
-    console.log("avant delete "+window.divfp);
+    //console.log("avant delete "+window.divfp);
     window.divfp.parentNode.removeChild(window.divfp);
-    console.log("après delete "+window.divfp);
+    //console.log("après delete "+window.divfp);
   }
   window.divfp = window.tl.getDocument().createElement("div");
   window.divfp.className = "fullPage";
   delete window.fpimg;
-  console.log(window.fpimg);
+  //console.log(window.fpimg);
   window.fpimg = document.createElement('img');
-  console.log(window.fpimg);
-  window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/exit-fullscreen.svg');
+  //console.log(window.fpimg);
+  window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/exit-fullscreen_white.svg');
   window.divfp.appendChild(window.fpimg);
   window.fpimg.style.marginRight="0.15em";
   window.fpimg.setAttribute('onclick','disableFullPage();'); // for FF
   window.fpimg.onclick = function() {disableFullPage();}; // for IE
   window.tl._containerDiv.appendChild(window.divfp);
-  window.divfp.style.position = "relative";
   window.divfp.style.zIndex="100";
-  window.divfp.style.float = "right";
-  window.divfp.style.bottom = "100%"
-  //window.divfp.style.right = "0";
-  //window.divfp.style.top = "0";
+  //window.divfp.style.position = "relative";
+  //window.divfp.style.float = "right";
+  //window.divfp.style.bottom = "100%"
+  window.divfp.style.position = "absolute";
+  window.divfp.style.right = "0%";
+  window.divfp.style.bottom = "0%";
   window.divfp.style.cursor = "pointer";
-  i
 }
 
 function disableFullPage() {
