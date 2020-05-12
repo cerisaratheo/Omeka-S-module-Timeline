@@ -117,6 +117,7 @@ var oTimeline = {
     var tl = Timeline.create(document.getElementById(timelineId), bandInfos);
     window.tl = tl;
     window.tlid = timelineId;
+    //console.log("TUTUTUTUTU"+timelineData);
     tl.loadJSON(timelineData, function(json, url) {
       // log the timelineData, and see what's there
       // figure out what's creating the timelineData json
@@ -319,7 +320,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
     if (typeof window.regexpckb !== 'undefined') {
       for (var i=0; i<window.regexpckb.length; i++) {
         var regex = new RegExp(window.regexpckb[i], "i");
-        if (regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart())) {
+        if (regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart()) || regex.test(evt.getClassName())) {
           return true;
         }
       }
@@ -327,7 +328,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
     if (window.regexpfilter==null) return false;
     {
       var regex = new RegExp(window.regexpfilter, "i");
-      return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart());
+      return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart()) || regex.test(evt.getClassName());
     }
   }
 
@@ -412,19 +413,29 @@ function performFilteringCkb(timeline, bandIndices, table) {
     window.regexpckb.push(list[i]);
   }
   var filterMatcher = function(evt) {
-    //console.log("   evt     "+Object.values(evt));
-    //console.log("   KEYS    "+Object.keys(evt));
+    /*
+    console.log("   evt     "+Object.values(evt));
+    console.log("   KEYS    "+Object.keys(evt));
+    console.log("   obj    "+evt._id);
+    console.log("   ClassName    "+evt._classname);
+    if (evt._id === "e381") {
+      console.log("   evt     "+Object.values(evt));
+      console.log("   keys    "+Object.keys(evt));
+      console.log("   TRUC    "+evt._classname);
+    }
+    console.log("   obj    "+Object.keys(evt._obj));
+    */
     if (window.regexpfilter==null && window.regexpckb.length==0) return true;
     for (var i=0; i<window.regexpckb.length; i++) {
       var regex = new RegExp(window.regexpckb[i], "i");
-      if (regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart())) {
+      if (regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart()) || regex.test(evt.getClassName())) {
         return true;
       }
     }
     if (window.regexpfilter==null) return false;
     {
       var regex = new RegExp(window.regexpfilter, "i");
-      return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart());
+      return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart()) || regex.test(evt.getClassName());
     }
   }
 
@@ -447,7 +458,7 @@ function clearAllCkb(timeline, bandIndices, table, createfilt) {
     var filterMatcher = function(evt) {
       if (window.regexpfilter==null) return true;
       var regex = new RegExp(window.regexpfilter, "i");
-      return regex.test(evt.getText()) || regex.test(evt.getDescription());
+      return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart());
     }
 
     for (var i = 0; i < bandIndices.length; i++) {
