@@ -591,9 +591,10 @@ function enableFullPage() {
   }
   document.getElementsByTagName("header")[0].style.display = "none";
   document.getElementsByTagName("footer")[0].style.display = "none";
-  window.contentPadding = document.getElementById("content").style.padding;
+  window.contentStyle = document.getElementById("content").style;
+  //window.contentPadding = document.getElementById("content").style.padding;
   document.getElementById("content").style.padding = "0";
-  window.contentMargin = document.getElementById("content").style.margin;
+  //window.contentMargin = document.getElementById("content").style.margin;
   document.getElementById("content").style.margin = "0";
   var b = document.getElementsByClassName("blocks")[0].children;
   for (var i=0; i<b.length; i++) {
@@ -603,6 +604,9 @@ function enableFullPage() {
       b[i].style.display = "none";
     }
     if (fw[0] === "timeline") {
+      //window.biStyle = b[i].style;
+      //window.bichildren2Style = b[i].children[2].style;
+      //window.bichildren4Style = b[i].children[4].style;
       window.cadreExtMargin = b[i].style.margin;
       b[i].style.margin = "0";
       window.cadreExtPadding = b[i].style.padding;
@@ -712,8 +716,9 @@ function disableFullPage() {
   }
   document.getElementsByTagName("header")[0].style.display = "block";
   document.getElementsByTagName("footer")[0].style.display = "block";
-  document.getElementById("content").style.padding = window.contentPadding;
-  document.getElementById("content").style.margin = window.contentMargin;
+  document.getElementById("content").style = window.contentStyle;
+  //document.getElementById("content").style.padding = window.contentPadding;
+  //document.getElementById("content").style.margin = window.contentMargin;
   var b = document.getElementsByClassName("blocks")[0].children;
   for (var i=0; i<b.length; i++) {
     var fw = [];
@@ -722,6 +727,9 @@ function disableFullPage() {
       b[i].style.display = "block";
     }
     if (fw[0] === "timeline") {
+      //b[i].style = window.biStyle;
+      //b[i].children[2].style = window.bichildren2Style;
+      //b[i].children[4].style = window.bichildren4Style;
       b[i].style.margin = window.cadreExtMargin;
       b[i].style.padding = window.cadreExtPadding;
       b[i].style.height = window.cadreExtHeight;
@@ -737,4 +745,5 @@ function disableFullPage() {
   recurseDomChildren(document.getElementsByClassName("blocks")[0], "", "");
   window.divfpfilt.parentNode.removeChild(window.divfpfilt);
   addFullPageButton(window.tlid);
+  performFilteringInputs(window.tl, [0,1], window.tb);
 }
