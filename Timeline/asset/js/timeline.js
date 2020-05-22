@@ -163,7 +163,7 @@ function addFullPageButton(timelineId) {
   window.divfp.appendChild(window.fpimg);
   window.fpimg.style.marginRight="0.15em";
   window.fpimg.setAttribute('onclick','enableFullPage();'); // for FF
-  window.fpimg.onclick = function() {enableFullPage();}; // for IE
+  //window.fpimg.onclick = function() {enableFullPage();}; // for IE
   window.tl._containerDiv.appendChild(window.divfp);
   window.divfp.style.zIndex="100";
   //window.divfp.style.position = "relative";
@@ -580,12 +580,15 @@ function animateLeft(obj, from, to){
 
 
 function enableFullPage() {
+  //console.log("res "+screen.height);
   window.fltVisible=1;
   var theotab = document.getElementById("fltLabelsButton").firstChild;
   theotab.style.position = "relative";
   recurseDomChildren(theotab, "relative", "block");
 
-  document.getElementById("user-bar").style.display = "none";
+  if (document.getElementById("user-bar") != null) {
+    document.getElementById("user-bar").style.display = "none";
+  }
   document.getElementsByTagName("header")[0].style.display = "none";
   document.getElementsByTagName("footer")[0].style.display = "none";
   window.contentPadding = document.getElementById("content").style.padding;
@@ -633,7 +636,7 @@ function enableFullPage() {
   window.divfp.appendChild(window.fpimg);
   window.fpimg.style.marginRight="0.15em";
   window.fpimg.setAttribute('onclick','disableFullPage();'); // for FF
-  window.fpimg.onclick = function() {disableFullPage();}; // for IE
+  //window.fpimg.onclick = function() {disableFullPage();}; // for IE
   window.tl._containerDiv.appendChild(window.divfp);
   window.divfp.style.zIndex="100";
   window.divfp.style.position = "absolute";
@@ -650,7 +653,7 @@ function enableFullPage() {
   window.divfpfiltzone.style.top = "0%";
   window.divfpfiltzone.style.zIndex="101";
   window.divfpfiltzone.style.height = "100vh";
-  if (screen.height < 1080) {
+  if (screen.height < 864) {
     window.divfpfiltzone.style.width = "26vw";
     divFleche.style.height = "5vh";
     animateLeft(window.divfpfiltzone, 0, -24);
@@ -700,11 +703,13 @@ function enableFullPage() {
   window.divfpfiltzone.appendChild(divFleche);
 
   window.fleche.setAttribute('onclick','clickfleche();'); // for FF
-  window.fleche.onclick = function() {clickfleche();}; // for IE
+  //window.fleche.onclick = function() {clickfleche();}; // for IE
 }
 
 function disableFullPage() {
-  document.getElementById("user-bar").style.display = "block";
+  if (document.getElementById("user-bar") != null) {
+    document.getElementById("user-bar").style.display = "block";
+  }
   document.getElementsByTagName("header")[0].style.display = "block";
   document.getElementsByTagName("footer")[0].style.display = "block";
   document.getElementById("content").style.padding = window.contentPadding;
