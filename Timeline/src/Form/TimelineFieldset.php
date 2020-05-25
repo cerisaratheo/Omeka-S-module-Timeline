@@ -142,14 +142,24 @@ class TimelineFieldset extends Fieldset
       'type' => Element\Select::class,
       'options' => [
         'label' => 'User filters', // @translate
-        'info' => 'You can choose to add or not a filters area with a simple filter and some highlights filters where the user can enter his own filters.', // @translate
+        'info' => 'You can choose to add a selection filter and highlight filters.', // @translate
         'value_options' => [
           'yes',
           'no',
         ]
       ],
-      'attributes' => [
-        'required' => true,
+    ])
+
+    ->add([
+      'name' => 'o:block[__blockIndex__][o:data][UserCheckbox]',
+      'type' => Element\Select::class,
+      'options' => [
+        'label' => 'User checkboxes', // @translate
+        'info' => 'You can choose to let the user add his own checkbox filters, which are reseted every time the page is refreshed. Usable only if User Filters are enabled.', // @translate
+        'value_options' => [
+          'yes',
+          'no',
+        ]
       ],
     ])
 
@@ -158,7 +168,7 @@ class TimelineFieldset extends Fieldset
       'type' => Element\Textarea::class,
       'options' => [
         'label' => 'Checkbox filters', // @translate
-        'info' => 'Add some filters under the timeline (separated with a semicolon e.g. word1;word2).', // @translate
+        'info' => 'Add some clickable predefined filter keywords under the timeline (one per line).', // @translate
       ],
       'attributes' => [
         'rows' => 4,

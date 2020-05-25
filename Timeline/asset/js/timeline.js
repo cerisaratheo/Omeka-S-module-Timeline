@@ -209,8 +209,8 @@ function loopNodeChildren(nodes, position, display)
   }
 }
 
-
 function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handler) {
+  window.id=0;
   window.regexpckb = [];
 
   // la row0 a deja ete inseree: elle contient le bouton "clearall"
@@ -271,35 +271,79 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
   }
 }
 
+function addBtTmpCkb(text) {
+  if (window.params.UserCheckbox === "0") {
+    var tr = window.tb.rows[2];
+    var td = tr.insertCell(1);
+    td.style.borderBottomStyle = "none";
+    var bt = document.createElement("button");
+    bt.innerHTML = "ajouter un filtre temporaire";
+    td.appendChild(bt);
+    SimileAjax.DOM.registerEvent(bt, "click", function() {
+      //var txt = window.td.firstChild.rows[2].cells[0].firstChild.value;
+      console.log("txt "+text);
+
+      tr = window.tbflt.insertRow(0);
+      td = tr.insertCell(0);
+
+      var ckb = document.createElement("input");
+      var ckbid = "ckb"+window.id;
+      console.log("ckbid "+ckbid)
+      ckb.setAttribute("type", "checkbox");
+      ckb.setAttribute("id", ckbid);
+      td.appendChild(ckb);
+      td.style.borderBottomStyle = "none";
+      td = tr.insertCell(1);
+      var input = document.createElement("label");
+      input.setAttribute("for", ckbid);
+      var t = document.createTextNode(text);
+      input.appendChild(t);
+      td.appendChild(input);
+      SimileAjax.DOM.registerEvent(ckb, "change", window.handlerCkb);
+      tr.children[1].style.borderBottomStyle = "none";
+      window.id++;
+    });
+  }
+}
+
+function removeBtTmpCkb() {
+  if (window.tb.rows[2].cells[1] != null) {
+    window.tb.rows[2].deleteCell(1);
+  }
+}
 
 function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
+  window.params = params;
   var tablelabels = document.createElement("table");
   window.tb = tablelabels;
   var tableflt = document.createElement("table");
+  window.tbflt = tableflt;
   var divlabels = document.getElementById("fltLabelsButton");
   var divflt = document.getElementById("ckbfilters");
-
-  var tr = tablelabels.insertRow(0);
-  var td = tr.insertCell(tr.cells.length);
-  td.style.borderBottomStyle = "none";
-  var button = document.createElement("button");
-  button.innerHTML = "Clear All";
-  SimileAjax.DOM.registerEvent(button, "click", function() {
-    clearAllCkb(timeline, bandIndices, tableflt, false);
-    clearAllInputs(timeline, bandIndices, tablelabels);
-  });
-  td.appendChild(button);
 
   divlabels.appendChild(tablelabels);
   divflt.appendChild(tableflt);
 
-
-  var handlerCkb = function(elmt, evt, target) {
+  window.handlerCkb = function(elmt, evt, target) {
     onCheck(timeline, bandIndices, tableflt);
   };
 
-  var handlerInputs = function(elmt, evt, target) {
+  window.handlerInputs = function(elmt, evt, target) {
     onKeyPress(timeline, bandIndices, tablelabels);
+  };
+
+  if (params.userFilters === '0' || params.filters != "") {
+    var tr = tablelabels.insertRow(0);
+    var td = tr.insertCell(tr.cells.length);
+    td.style.borderBottomStyle = "none";
+    var button = document.createElement("button");
+    button.innerHTML = "Clear All";
+    SimileAjax.DOM.registerEvent(button, "click", function() {
+      clearAllCkb(timeline, bandIndices, tableflt, false);
+      clearAllInputs(timeline, bandIndices, tablelabels);
+      removeBtTmpCkb();
+    });
+    td.appendChild(button);
   }
 
   if (params.userFilters === '0') {
@@ -310,6 +354,7 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
   if (words[words.length-1] === "" || words[words.length-1] === " ") {
     words.splice(words.length-1, 1);
   }
+  window.id = words.length;
   if (words.length>=1 && words[0] != "" && words[0] != " ") {
     for (var i=words.length-1; i>=0; i--) {
       tr = tableflt.insertRow(0);
@@ -361,6 +406,16 @@ function performFilteringInputs(timeline, bandIndices, table) {
 
   var tr = table.rows[2];
   var text = cleanString(tr.cells[0].firstChild.value);
+
+  if (text != null && text != "" && text != " ") {
+    //if (window.tb.rows[2].cells[1] === undefined) {
+      removeBtTmpCkb();
+      addBtTmpCkb(text);
+    //}
+  }
+  else {
+    removeBtTmpCkb();
+  }
 
   window.regexpfilter = null;
   if (text.length > 0) {
@@ -628,86 +683,88 @@ function enableFullPage() {
     }
   }
 
-  if (window.divfp != null) {
-    window.divfp.parentNode.removeChild(window.divfp);
-  }
-  window.divfp = window.tl.getDocument().createElement("div");
-  //window.divfp = document.createElement("div");
-  window.divfp.className = "fullPage";
-  delete window.fpimg;
-  window.fpimg = document.createElement('img');
-  window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/exit-fullscreen_white.svg');
-  window.divfp.appendChild(window.fpimg);
-  window.fpimg.style.marginRight="0.15em";
-  window.fpimg.setAttribute('onclick','disableFullPage();'); // for FF
-  //window.fpimg.onclick = function() {disableFullPage();}; // for IE
-  window.tl._containerDiv.appendChild(window.divfp);
-  window.divfp.style.zIndex="100";
-  window.divfp.style.position = "absolute";
-  window.divfp.style.right = "0%";
-  window.divfp.style.bottom = "0%";
-  window.divfp.style.cursor = "pointer";
+    if (window.divfp != null) {
+      window.divfp.parentNode.removeChild(window.divfp);
+    }
+    window.divfp = window.tl.getDocument().createElement("div");
+    //window.divfp = document.createElement("div");
+    window.divfp.className = "fullPage";
+    delete window.fpimg;
+    window.fpimg = document.createElement('img');
+    window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/exit-fullscreen_white.svg');
+    window.divfp.appendChild(window.fpimg);
+    window.fpimg.style.marginRight="0.15em";
+    window.fpimg.setAttribute('onclick','disableFullPage();'); // for FF
+    //window.fpimg.onclick = function() {disableFullPage();}; // for IE
+    window.tl._containerDiv.appendChild(window.divfp);
+    window.divfp.style.zIndex="100";
+    window.divfp.style.position = "absolute";
+    window.divfp.style.right = "0%";
+    window.divfp.style.bottom = "0%";
+    window.divfp.style.cursor = "pointer";
 
-  window.divfpfiltzone = window.tl.getDocument().createElement("div");
-  var divFleche = document.createElement('div');
-  window.fleche = document.createElement('img');
-  //window.divfpfiltzone = document.createElement("div");
-  window.divfpfiltzone.id = "fullPageFiltersZone";
-  window.divfpfiltzone.style.position = "absolute";
-  window.divfpfiltzone.style.top = "0%";
-  window.divfpfiltzone.style.zIndex="101";
-  window.divfpfiltzone.style.height = "100vh";
-  if (screen.height < 864) {
-    window.divfpfiltzone.style.width = "26vw";
-    divFleche.style.height = "5vh";
-    animateLeft(window.divfpfiltzone, 0, -24);
-    window.fleche.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/flecheDroite.svg');
-    window.fltVisible = 0;
+  if (window.tb.firstChild.children[0] != null) {
+    window.divfpfiltzone = window.tl.getDocument().createElement("div");
+    var divFleche = document.createElement('div');
+    window.fleche = document.createElement('img');
+    //window.divfpfiltzone = document.createElement("div");
+    window.divfpfiltzone.id = "fullPageFiltersZone";
+    window.divfpfiltzone.style.position = "absolute";
+    window.divfpfiltzone.style.top = "0%";
+    window.divfpfiltzone.style.zIndex="101";
+    window.divfpfiltzone.style.height = "100vh";
+    if (screen.height < 864) {
+      window.divfpfiltzone.style.width = "26vw";
+      divFleche.style.height = "5vh";
+      animateLeft(window.divfpfiltzone, 0, -24);
+      window.fleche.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/flecheDroite.svg');
+      window.fltVisible = 0;
 
-  }
-  else {
-    window.divfpfiltzone.style.width = "19vw";
-    divFleche.style.height = "4vh";
-    animateLeft(window.divfpfiltzone, 0, -17);
-    window.fleche.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/flecheDroite.svg');
-    window.fltVisible = 0;
-  }
-  window.divfpfilt = window.tl.getDocument().createElement("div");
-  window.divfpfilt.id = "fullPageFilters";
-  window.divfpfilt.style.width = "90%";
-  window.divfpfilt.style.height = "100vh";
-  window.divfpfilt.style.position = "absolute";
-  window.divfpfilt.style.top = "0%";
-  window.divfpfilt.style.left = "0%";
-  window.divfpfilt.style.backgroundColor = "rgb(97, 87, 107)";
-  window.divfpfilt.style.zIndex="101";
-  window.divfpfilt.style.overflow = "auto";
-  window.divfpfilt.appendChild(document.getElementById("filters"));
-  window.divfpfilt.firstChild.style.display = "block";
-  window.divfpfilt.style.color = "white";
-  window.divfpfiltzone.appendChild(window.divfpfilt);
-  window.tl._containerDiv.appendChild(divfpfiltzone);
+    }
+    else {
+      window.divfpfiltzone.style.width = "19vw";
+      divFleche.style.height = "4vh";
+      animateLeft(window.divfpfiltzone, 0, -17);
+      window.fleche.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/flecheDroite.svg');
+      window.fltVisible = 0;
+    }
+    window.divfpfilt = window.tl.getDocument().createElement("div");
+    window.divfpfilt.id = "fullPageFilters";
+    window.divfpfilt.style.width = "90%";
+    window.divfpfilt.style.height = "100vh";
+    window.divfpfilt.style.position = "absolute";
+    window.divfpfilt.style.top = "0%";
+    window.divfpfilt.style.left = "0%";
+    window.divfpfilt.style.backgroundColor = "rgb(97, 87, 107)";
+    window.divfpfilt.style.zIndex="101";
+    window.divfpfilt.style.overflow = "auto";
+    window.divfpfilt.appendChild(document.getElementById("filters"));
+    window.divfpfilt.firstChild.style.display = "block";
+    window.divfpfilt.style.color = "white";
+    window.divfpfiltzone.appendChild(window.divfpfilt);
+    window.tl._containerDiv.appendChild(divfpfiltzone);
 
-  divFleche.id = "divFleche";
-  divFleche.appendChild(fleche);
-  divFleche.style.position = "absolute";
-  divFleche.style.width = "10%";
-  divFleche.style.right = "0%";
-  divFleche.style.top = "47%";
-  divFleche.style.zIndex = "101";
-  divFleche.style.backgroundColor = "rgb(97, 87, 107)";
-  /*
-  divFleche.addEventListener("mouseover", function(event) {
+    divFleche.id = "divFleche";
+    divFleche.appendChild(fleche);
+    divFleche.style.position = "absolute";
+    divFleche.style.width = "10%";
+    divFleche.style.right = "0%";
+    divFleche.style.top = "47%";
+    divFleche.style.zIndex = "101";
+    divFleche.style.backgroundColor = "rgb(97, 87, 107)";
+    /*
+    divFleche.addEventListener("mouseover", function(event) {
     event.target.style.display = "block";
   });
   divFleche.addEventListener("mouseleave", function(event) {
-    event.target.style.display = "none";
-  });
-  */
-  window.divfpfiltzone.appendChild(divFleche);
+  event.target.style.display = "none";
+});
+*/
+window.divfpfiltzone.appendChild(divFleche);
 
-  window.fleche.setAttribute('onclick','clickfleche();'); // for FF
-  //window.fleche.onclick = function() {clickfleche();}; // for IE
+window.fleche.setAttribute('onclick','clickfleche();'); // for FF
+//window.fleche.onclick = function() {clickfleche();}; // for IE
+}
 }
 
 function disableFullPage() {
@@ -743,7 +800,11 @@ function disableFullPage() {
   }
   document.getElementsByClassName("blocks")[0].appendChild(document.getElementById("filters"));
   recurseDomChildren(document.getElementsByClassName("blocks")[0], "", "");
-  window.divfpfilt.parentNode.removeChild(window.divfpfilt);
+  if (window.divfpfiltzone != null) {
+    window.divfpfiltzone.parentNode.removeChild(window.divfpfiltzone);
+  }
   addFullPageButton(window.tlid);
-  performFilteringInputs(window.tl, [0,1], window.tb);
+  if (window.tb.firstChild.children[4] != null) {
+    performFilteringInputs(window.tl, [0,1], window.tb);
+  }
 }
