@@ -73,8 +73,6 @@ return [
                 'viewer' => '{}',
                 'query' => [],
                 'library' => 'simile',
-                'UserFilters' => '0',
-                'UserCheckbox' => '0',
                 'filters' => "",
                 // The id of dcterms:date in the standard install of Omeka S.
                 'item_date_id' => '7',

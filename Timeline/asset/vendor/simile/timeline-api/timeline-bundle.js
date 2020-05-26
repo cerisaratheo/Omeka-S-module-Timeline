@@ -2530,7 +2530,7 @@ this.autoWidthAnimationTime=500;
 this.timeline_start=null;
 this.timeline_stop=null;
 this.ether={backgroundColors:[],highlightOpacity:50,interval:{line:{show:true,opacity:25},weekend:{opacity:30},marker:{hAlign:"Bottom",vAlign:"Right"}}};
-this.event={track:{height:10,gap:2,offset:2,autoWidthMargin:1.5},overviewTrack:{offset:20,tickHeight:6,height:2,gap:1,autoWidthMargin:5},tape:{height:4},instant:{icon:Timeline.urlPrefix+"images/dull-blue-circle.png",iconWidth:10,iconHeight:10,impreciseOpacity:20,impreciseIconMargin:3},duration:{impreciseOpacity:20},label:{backgroundOpacity:50,offsetFromLine:3},highlightColors:["#FFFF00","#FFC000","#FF0000","#0000FF"],highlightLabelBackground:false,bubble:{width:250,maxHeight:0,titleStyler:function(A){A.className="timeline-event-bubble-title";
+this.event={track:{height:10,gap:2,offset:2,autoWidthMargin:1.5},overviewTrack:{offset:20,tickHeight:6,height:2,gap:1,autoWidthMargin:5},tape:{height:4},instant:{icon:Timeline.urlPrefix+"images/dull-blue-circle.png",iconWidth:10,iconHeight:10,impreciseOpacity:20,impreciseIconMargin:3},duration:{impreciseOpacity:20},label:{backgroundOpacity:50,offsetFromLine:3},highlightColors:["#FFED61","#86E36F","#FF6161","#75B3FF"]/*default : ["#FFFF00","#FFC000","#FF0000","#0000FF"]*/,highlightLabelBackground:true,bubble:{width:250,maxHeight:0,titleStyler:function(A){A.className="timeline-event-bubble-title";
 },bodyStyler:function(A){A.className="timeline-event-bubble-body";
 },imageStyler:function(A){A.className="timeline-event-bubble-image";
 },wikiStyler:function(A){A.className="timeline-event-bubble-wiki";
