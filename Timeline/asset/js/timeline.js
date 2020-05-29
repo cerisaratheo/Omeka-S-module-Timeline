@@ -168,7 +168,7 @@ var oTimeline = {
 			cY = event.clientY;
 			deltaY = cY-window.mdY;
 
-			console.log("height "+tb0.style.height+" "+tb0.clientHeight);
+			//console.log("height "+tb0.style.height+" "+tb0.clientHeight);
 /*
 			var band2 = document.getElementById("timeline-2");
 			if (band2.style.height==="100vh") {
@@ -189,7 +189,7 @@ var oTimeline = {
 			console.log(" ");
 			console.log("mousedown Y : " + window.mdY + "			souris Y : " + cY);
 			console.log(" ");*/
-			console.log("delta Y : "+deltaY);
+			//console.log("delta Y : "+deltaY);
 			window.mdY = event.clientY;
 		}
 	});
@@ -335,14 +335,14 @@ function addBtTmpCkb(text) {
 		td.appendChild(bt);
 		SimileAjax.DOM.registerEvent(bt, "click", function() {
 			//var txt = window.td.firstChild.rows[2].cells[0].firstChild.value;
-			console.log("txt "+text);
+			//console.log("txt "+text);
 
 			tr = window.tbflt.insertRow(0);
 			td = tr.insertCell(0);
 
 			var ckb = document.createElement("input");
 			var ckbid = "ckb"+window.id;
-			console.log("ckbid "+ckbid)
+			//console.log("ckbid "+ckbid)
 			ckb.setAttribute("type", "checkbox");
 			ckb.setAttribute("id", ckbid);
 			td.appendChild(ckb);
