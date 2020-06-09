@@ -354,29 +354,19 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	}
 
 	var highlightMatcher = function(evt) {
-		if (window.params.metaFlt==0 && typeof(window.regexes)!="undefined") {
-			for (var i=0; i<window.regexes.length; i++) {
-				var regex = new RegExp(window.regexes[i], "i");
-				if (regex.test(evt.getLink())) {
-					return i;
-				}
+		if (window.metakeywords!=null && window.metakeywords.length>0) {
+			// cas ou on fait une recherche en metadata
+			for (var i=0; i<window.metakeywords.length; i++) {
+				var regex = window.metakeywords[i];
+				if (regex.test(evt.getLink())) return i;
 			}
-		}
-		if (window.params.metaFlt==1) {
-			if (window.metakeywords!=null && window.metakeywords.length>0) {
-				// cas ou on fait une recherche en metadata
-				for (var i=0; i<window.metakeywords.length; i++) {
-					var regex = window.metakeywords[i];
-					if (regex.test(evt.getLink())) return i;
-				}
-			} else {
-				// cas ou on fait une recherche sans metadata
-				if (window.regexes != null && typeof(window.regexes) != 'undefined') {
-					for (var i=0; i<window.regexes.length; i++) {
-						var regex = new RegExp(window.regexes[i], "i");
-						if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
-							return i;
-						}
+		} else {
+			// cas ou on fait une recherche sans metadata
+			if (window.regexes != null && typeof(window.regexes) != 'undefined') {
+				for (var i=0; i<window.regexes.length; i++) {
+					var regex = new RegExp(window.regexes[i], "i");
+					if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+						return i;
 					}
 				}
 			}
@@ -553,6 +543,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
 	for (var x = 0; x < tr.cells.length; x++) {
 		var input = tr.cells[x].firstChild;
 		var text2 = cleanString(input.value);
+		console.log(text2);
 		if (text2.length > 0) {
 			window.regexes.push(text2);
 		} else {
@@ -566,8 +557,8 @@ function clearAllInputs(timeline, bandIndices, table) {
 	window.regexpfilter = null;
 	window.regexes = null;
 	window.metakeywords = [];
-	table.rows[2].cells[0].firstChild.value = "";
-	var tr = table.rows[4];
+	table.rows[3].cells[0].firstChild.value = "";
+	var tr = table.rows[5];
 	for (var x = 0; x < tr.cells.length; x++) {
 		tr.cells[x].firstChild.value = "";
 	}
@@ -604,7 +595,7 @@ function searchInMetadata() {
 	window.metadataIds = [];
 	for (var i=0;i<keywords2search.length;i++) {
 		if (keywords2search[i].length>0) {
-			window.url = "http://localhost/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+keywords2search[i]+"%22";
+			window.url = "http://"+window.params.domainName+"/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+keywords2search[i]+"%22";
 			httpGet(window.url, function() {
 				if (window.pgContent != null) {
 					for (var j = 0; j<window.pgContent.length; j++) {
@@ -626,7 +617,7 @@ function callAPIsearch() {
 function recursSearch(z) {
 	if (z>3) return;
 	if (typeof(window.regexes) != 'undefined' && window.regexes != null && window.regexes[z] != null && window.regexes[z].length>0) {
-		var url = "http://localhost/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+window.regexes[z]+"%22";
+		var url = "http://"+window.params.domainName+"/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+window.regexes[z]+"%22";
 		httpGet(url, function() {
 			if (window.pgContent != null) {
 				var rst=window.pgContent[0];
@@ -641,7 +632,8 @@ function recursSearch(z) {
 			}
 			recursSearch(z+1);
 		});
-	} else {
+	}
+	else {
 		window.metakeywords.push(new RegExp("hfdjkeyvfiulegvbhrzvr","i"));
 		recursSearch(z+1);
 	}
@@ -875,7 +867,7 @@ function disableFullPage() {
 		window.divfpfiltzone.parentNode.removeChild(window.divfpfiltzone);
 	}
 	addFullPageButton(window.tlid);
-	if (window.tb.firstChild.children[4] != null) {
+	if (window.tb.firstChild.children[5] != null) {
 		//performFilteringInputs(window.tl, [0,1], window.tb);
 		metaSearch();
 	}
