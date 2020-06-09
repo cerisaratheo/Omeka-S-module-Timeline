@@ -142,7 +142,7 @@ class TimelineFieldset extends Fieldset
       'type' => Element\text::class,
       'options' => [
         'label' => 'Domain Name', // @translate
-        'info' => 'Enter your domain name without "http://" at the beginning and without "/" at the end (in order to make metadata search, which is using some api call, work).', // @translate
+        'info' => 'Enter your domain name without "http://" at the beginning and without "/" at the end.', // @translate
       ],
       'attributes' => [
         'required' => true,
