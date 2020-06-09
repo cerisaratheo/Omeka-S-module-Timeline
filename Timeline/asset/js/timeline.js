@@ -270,14 +270,24 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	window.regexpckb = [];
 
 	// la row0 a deja ete inseree: elle contient le bouton "clearall"
-	// la row1 contiendra le label Filter
-	var tr = table.insertRow(1);
+	// la row1 contient le bouton qui active la recherche dans les metadonnees
+	tr = table.insertRow(1);
+	td = tr.insertCell(0);
+	td.style.borderBottom = "none";
+	window.metaBt = document.createElement("button");
+	window.metaBt.innerHTML = "Chercher dans les metadonnées";
+	td.appendChild(window.metaBt);
+	window.metaBt.addEventListener("click", metaSearch);
+
+
+	// la row2 contiendra le label Filter
+	var tr = table.insertRow(2);
 	var td = tr.insertCell(0);
 	td.style.borderBottomStyle = "none";
 	td.innerHTML = "Filter :";
 
-	// la row2 contiendra le textfield pour le filtre
-	tr = table.insertRow(2);
+	// la row3 contiendra le textfield pour le filtre
+	tr = table.insertRow(3);
 	window.tr2 = tr;
 	td = tr.insertCell(0);
 	td.style.borderBottomStyle = "none";
@@ -287,15 +297,15 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	SimileAjax.DOM.registerEvent(input, "keydown", handler);
 	td.appendChild(input);
 
-	// la row3 contient le label "highlight"
-	tr = table.insertRow(3);
+	// la row4 contient le label "highlight"
+	tr = table.insertRow(4);
 	td = tr.insertCell(0);
 	window.hl = td;
 	td.style.borderBottomStyle = "none";
 	td.innerHTML = "Highlights:";
 
-	// la row4 contient les N highights text field
-	tr = table.insertRow(4);
+	// la row5 contient les N highights text field
+	tr = table.insertRow(5);
 	for (var i = 0; i < theme.event.highlightColors.length; i++) {
 		td = tr.insertCell(i);
 		td.style.borderBottomStyle = "none";
@@ -380,18 +390,12 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	}
 	timeline.paint();
 
-	td = window.tr2.insertCell(1);
-	td.style.borderBottom = "none";
-	window.metaBt = document.createElement("button");
-	window.metaBt.innerHTML = "Chercher dans les metadonnées";
-	td.appendChild(window.metaBt);
-	window.metaBt.addEventListener("click", metaSearch);
 }
 
 function addBtTmpCkb(text) {
 	if (window.params.UserCheckbox === "0") {
-		var tr = window.tb.rows[2];
-		var td = tr.insertCell(2);
+		var tr = window.tb.rows[3];
+		var td = tr.insertCell(1);
 		td.style.borderBottomStyle = "none";
 		var bt = document.createElement("button");
 		bt.innerHTML = "ajouter un filtre temporaire";
@@ -421,8 +425,8 @@ function addBtTmpCkb(text) {
 }
 
 function removeBtTmpCkb() {
-	if (window.tb.rows[2].cells[2] != null) {
-		window.tb.rows[2].deleteCell(2);
+	if (window.tb.rows[3].cells[1] != null) {
+		window.tb.rows[3].deleteCell(1);
 	}
 }
 
@@ -523,7 +527,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
 	window.metakeywords=[];
 	window.metadataIds=[];
 
-	var tr = table.rows[2];
+	var tr = table.rows[3];
 	var text = cleanString(tr.cells[0].firstChild.value);
 
 	if (text != null && text != "" && text != " ") {
@@ -544,7 +548,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
 	}
 
 	// highlights appeles apres chaque char
-	tr = table.rows[4];
+	tr = table.rows[5];
 	window.regexes = [];
 	for (var x = 0; x < tr.cells.length; x++) {
 		var input = tr.cells[x].firstChild;
