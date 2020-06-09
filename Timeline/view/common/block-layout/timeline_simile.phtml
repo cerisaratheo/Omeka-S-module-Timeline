@@ -7,6 +7,11 @@
 
 $escape = $this->plugin('escapeHtml');
 ?>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
 <?php if (!empty($data['heading'])): ?>
 <h2><?= $escape($data['heading']) ?></h2>
 <?php endif; ?>
@@ -21,6 +26,7 @@ $escape = $this->plugin('escapeHtml');
         params.filters = <?= json_encode($data['filters']) ?>;
         params.userFilters = <?= json_encode($data['UserFilters']) ?>;
         params.UserCheckbox = <?= json_encode($data['UserCheckbox']) ?>;
+        params.metaFlt = <?= json_encode($data['metaFlt']) ?>;
 
         oTimeline.loadTimeline(
             'timeline-<?= $block->id() ?>',

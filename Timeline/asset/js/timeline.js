@@ -12,52 +12,52 @@ var oTimeline = {
 
 	_monkeyPatchFillInfoBubble: function() {
 		var oldFillInfoBubble =
-			Timeline.DefaultEventSource.Event.prototype.fillInfoBubble;
+		Timeline.DefaultEventSource.Event.prototype.fillInfoBubble;
 		Timeline.DefaultEventSource.Event.prototype.fillInfoBubble =
-			function(elmt, theme, labeller) {
-				var doc = elmt.ownerDocument;
+		function(elmt, theme, labeller) {
+			var doc = elmt.ownerDocument;
 
-				var title = this.getText();
-				var link = this.getLink();
-				var image = this.getImage();
+			var title = this.getText();
+			var link = this.getLink();
+			var image = this.getImage();
 
-				if (image != null) {
-					var img = doc.createElement("img");
-					img.src = image;
+			if (image != null) {
+				var img = doc.createElement("img");
+				img.src = image;
 
-					theme.event.bubble.imageStyler(img);
-					elmt.appendChild(img);
-				}
+				theme.event.bubble.imageStyler(img);
+				elmt.appendChild(img);
+			}
 
-				var divTitle = doc.createElement("div");
-				var textTitle = doc.createElement("span");
-				textTitle.innerHTML = title;
-				if (link != null) {
-					var a = doc.createElement("a");
-					a.href = link;
-					a.appendChild(textTitle);
-					divTitle.appendChild(a);
-				} else {
-					divTitle.appendChild(textTitle);
-				}
-				theme.event.bubble.titleStyler(divTitle);
-				elmt.appendChild(divTitle);
+			var divTitle = doc.createElement("div");
+			var textTitle = doc.createElement("span");
+			textTitle.innerHTML = title;
+			if (link != null) {
+				var a = doc.createElement("a");
+				a.href = link;
+				a.appendChild(textTitle);
+				divTitle.appendChild(a);
+			} else {
+				divTitle.appendChild(textTitle);
+			}
+			theme.event.bubble.titleStyler(divTitle);
+			elmt.appendChild(divTitle);
 
-				var divBody = doc.createElement("div");
-				this.fillDescription(divBody);
-				theme.event.bubble.bodyStyler(divBody);
-				elmt.appendChild(divBody);
+			var divBody = doc.createElement("div");
+			this.fillDescription(divBody);
+			theme.event.bubble.bodyStyler(divBody);
+			elmt.appendChild(divBody);
 
-				var divTime = doc.createElement("div");
-				this.fillTime(divTime, labeller);
-				theme.event.bubble.timeStyler(divTime);
-				elmt.appendChild(divTime);
+			var divTime = doc.createElement("div");
+			this.fillTime(divTime, labeller);
+			theme.event.bubble.timeStyler(divTime);
+			elmt.appendChild(divTime);
 
-				var divWiki = doc.createElement("div");
-				this.fillWikiInfo(divWiki);
-				theme.event.bubble.wikiStyler(divWiki);
-				elmt.appendChild(divWiki);
-			};
+			var divWiki = doc.createElement("div");
+			this.fillWikiInfo(divWiki);
+			theme.event.bubble.wikiStyler(divWiki);
+			elmt.appendChild(divWiki);
+		};
 	},
 
 	loadTimeline: function(timelineId, timelineData, params) {
@@ -117,15 +117,22 @@ var oTimeline = {
 		var tl = Timeline.create(document.getElementById(timelineId), bandInfos);
 		window.tl = tl;
 		window.tlid = timelineId;
-		//console.log("TUTUTUTUTU"+timelineData);
 		tl.loadJSON(timelineData, function(json, url) {
 			// log the timelineData, and see what's there
 			// figure out what's creating the timelineData json
 			// console.log("json: ", json);
 			// console.log("timelineData: ", timelineData);
 			if (json.events.length > 0) {
-				//console.log(" EVENTS  "+json.events[0]);
 				eventSource.loadJSON(json, url);
+
+
+
+				var evts = eventSource._events._events._a;
+				var evt = null;
+				window.url = "";
+				window.pgContent = "";
+				evt = eventSource._events._events._a[i]._obj;
+
 				var centerDate = params.centerDate;
 				// console.log("centerDate: " + centerDate);
 				if (!centerDate) {
@@ -162,53 +169,52 @@ var oTimeline = {
 			window.mousedown = 0;
 		});
 
-  	tb0.addEventListener("mousemove", function() {
-		if (window.mousedown === 1) {
-			//cX = event.clientX;
-			cY = event.clientY;
-			deltaY = cY-window.mdY;
+		tb0.addEventListener("mousemove", function() {
+			if (window.mousedown === 1) {
+				//cX = event.clientX;
+				cY = event.clientY;
+				deltaY = cY-window.mdY;
 
-			//console.log("height "+tb0.style.height+" "+tb0.clientHeight);
-/*
-			var band2 = document.getElementById("timeline-2");
-			if (band2.style.height==="100vh") {
-			band2.style.height = band2.clientHeight+"px";
-			var band1 = document.getElementById("timeline-band-1");
-			band1.style.height = band1.clientHeight+"px";
-}*/
+				var bandTop = document.getElementById("timeline-band-0").style.top;
+				var nouvTop = parseInt(bandTop.substring(0,bandTop.length-2)) + deltaY;
+				if (nouvTop>0) return;
+				document.getElementById("timeline-band-0").style.top = nouvTop+"px";
 
-			var bandTop = document.getElementById("timeline-band-0").style.top;
-			var nouvTop = parseInt(bandTop.substring(0,bandTop.length-2)) + deltaY;
-			if (nouvTop>0) return;
-			document.getElementById("timeline-band-0").style.top = nouvTop+"px";
-
-			var bandHeight = document.getElementById("timeline-band-0").clientHeight;
-			var nouvHeight = bandHeight - deltaY;
-			document.getElementById("timeline-band-0").style.height = nouvHeight+"px";
-			/*console.log("mousedown X : " + window.mdX + "			souris X : " + cX);
-			console.log(" ");
-			console.log("mousedown Y : " + window.mdY + "			souris Y : " + cY);
-			console.log(" ");*/
-			//console.log("delta Y : "+deltaY);
-			window.mdY = event.clientY;
-		}
-	});
+				var bandHeight = document.getElementById("timeline-band-0").clientHeight;
+				var nouvHeight = bandHeight - deltaY;
+				document.getElementById("timeline-band-0").style.height = nouvHeight+"px";
+				window.mdY = event.clientY;
+			}
+		});
 
 	}
 };
 
-function onMouseMove(tb0) {
+function httpGet(url, hdler) {
+	if (window.XMLHttpRequest) {
+		xmlhttp=new XMLHttpRequest();
+	}
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+			var rep = JSON.parse(xmlhttp.responseText);
+			var reps = [];
+			for (var i=0;i<rep.length;i++) {
+				reps.push(rep[i]['o:id']);
+			}
+			window.pgContent = reps;
+			hdler();
+		}
+	}
+	xmlhttp.open("GET", url, false );
+	xmlhttp.send();
 }
-
 
 function addFullPageButton(timelineId) {
 	if (window.divfp != null) {
-		//console.log("avant add "+window.divfp.id);
 		window.divfp.parentNode.removeChild(window.divfp);
-		//console.log("après add "+window.divfp);
 	}
-	//console.log("classNameTimeline "+document.getElementsByClassName("timeline")[0].style.margin);
-	//document.getElementsByClassName("timeline")[0].style.margin = "0";
 	window.divfp = window.tl.getDocument().createElement("div");
 	window.divfp.className = "fullPage";
 	delete window.fpimg;
@@ -217,11 +223,8 @@ function addFullPageButton(timelineId) {
 	window.divfp.appendChild(window.fpimg);
 	window.fpimg.style.marginRight="0.15em";
 	window.fpimg.setAttribute('onclick','enableFullPage();'); // for FF
-	//window.fpimg.onclick = function() {enableFullPage();}; // for IE
 	window.tl._containerDiv.appendChild(window.divfp);
 	window.divfp.style.zIndex="100";
-	//window.divfp.style.position = "relative";
-	//window.divfp.style.cssFloat = "right";
 	window.divfp.style.position = "absolute";
 	window.divfp.style.right = "0%";
 	window.divfp.style.bottom = "0%";
@@ -253,7 +256,6 @@ function loopNodeChildren(nodes, position, display)
 	for(var i=0;i<nodes.length;i++)
 	{
 		node = nodes[i];
-		//console.log("dddddddddddddddddddddd "+node);
 		node.style.position = position;
 		node.style.display = display;
 		if(node.children)
@@ -292,57 +294,115 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	td.style.borderBottomStyle = "none";
 	td.innerHTML = "Highlights:";
 
-	/*
-  td = tr.insertCell(1);
-  td.style.borderBottomStyle = "none";
-  var divhigh = document.createElement("div");
-  td.appendChild(divhigh);
-  */
-
 	// la row4 contient les N highights text field
 	tr = table.insertRow(4);
 	for (var i = 0; i < theme.event.highlightColors.length; i++) {
 		td = tr.insertCell(i);
 		td.style.borderBottomStyle = "none";
 
-		/*
-    var divhighi = document.createElement("div");
-    divhigh.appendChild(divhighi);
-    */
-
 		input = document.createElement("input");
 		input.type = "text";
 		input.id="filtreInput";
 		SimileAjax.DOM.registerEvent(input, "keydown", handler);
 		td.appendChild(input);
-		//divhighi.appendChild(input);
 
 		var divColor = document.createElement("div");
 		divColor.style.height = "0.5em";
 		divColor.style.background = theme.event.highlightColors[i];
 		td.appendChild(divColor);
-		//divhighi.appendChild(divColor);
 	}
+
+	// TODO definir le setfilter xxxx
+	window.regexpckb = [];
+	window.regexpfilter = null;
+	window.metadataIds = [];
+
+	// cette fonction esy appelée à chaque affichage, pour chaque item
+	var filterMatcher = function(evt) {
+		if (window.regexpfilter==null && window.regexpckb.length==0) return true;
+		if (typeof(window.metadataIds) != 'undefined' && window.metadataIds.length > 0) {
+			for (var i=0; i<window.metadataIds.length; i++) {
+				var regex = new RegExp(window.metadataIds[i], "i");
+				if (regex.test(evt.getLink())) {
+					return true;
+				}
+			}
+		}
+		else {
+			for (var i=0; i<window.regexpckb.length; i++) {
+				var regex = new RegExp(window.regexpckb[i], "i");
+				if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+					return true;
+				}
+			}
+			if (window.regexpfilter==null) return false;
+			else {
+				var regex = new RegExp(window.regexpfilter, "i");
+				return regex.test(evt.getText()) || regex.test(evt.getDescription());
+			}
+		}
+	}
+
+	var highlightMatcher = function(evt) {
+		if (window.params.metaFlt==0 && typeof(window.regexes)!="undefined") {
+			for (var i=0; i<window.regexes.length; i++) {
+				var regex = new RegExp(window.regexes[i], "i");
+				if (regex.test(evt.getLink())) {
+					return i;
+				}
+			}
+		}
+		if (window.params.metaFlt==1) {
+			if (window.metakeywords!=null && window.metakeywords.length>0) {
+				// cas ou on fait une recherche en metadata
+				for (var i=0; i<window.metakeywords.length; i++) {
+					var regex = window.metakeywords[i];
+					if (regex.test(evt.getLink())) return i;
+				}
+			} else {
+				// cas ou on fait une recherche sans metadata
+				if (window.regexes != null && typeof(window.regexes) != 'undefined') {
+					for (var i=0; i<window.regexes.length; i++) {
+						var regex = new RegExp(window.regexes[i], "i");
+						if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+							return i;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for (var i = 0; i < bandIndices.length; i++) {
+		var bandIndex = bandIndices[i];
+		timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
+		timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
+	}
+	timeline.paint();
+
+	td = window.tr2.insertCell(1);
+	td.style.borderBottom = "none";
+	window.metaBt = document.createElement("button");
+	window.metaBt.innerHTML = "Chercher dans les metadonnées";
+	td.appendChild(window.metaBt);
+	window.metaBt.addEventListener("click", metaSearch);
 }
 
 function addBtTmpCkb(text) {
 	if (window.params.UserCheckbox === "0") {
 		var tr = window.tb.rows[2];
-		var td = tr.insertCell(1);
+		var td = tr.insertCell(2);
 		td.style.borderBottomStyle = "none";
 		var bt = document.createElement("button");
 		bt.innerHTML = "ajouter un filtre temporaire";
 		td.appendChild(bt);
 		SimileAjax.DOM.registerEvent(bt, "click", function() {
-			//var txt = window.td.firstChild.rows[2].cells[0].firstChild.value;
-			//console.log("txt "+text);
 
 			tr = window.tbflt.insertRow(0);
 			td = tr.insertCell(0);
 
 			var ckb = document.createElement("input");
 			var ckbid = "ckb"+window.id;
-			//console.log("ckbid "+ckbid)
 			ckb.setAttribute("type", "checkbox");
 			ckb.setAttribute("id", ckbid);
 			td.appendChild(ckb);
@@ -361,8 +421,8 @@ function addBtTmpCkb(text) {
 }
 
 function removeBtTmpCkb() {
-	if (window.tb.rows[2].cells[1] != null) {
-		window.tb.rows[2].deleteCell(1);
+	if (window.tb.rows[2].cells[2] != null) {
+		window.tb.rows[2].deleteCell(2);
 	}
 }
 
@@ -455,17 +515,21 @@ function onKeyPress(timeline, bandIndices, table) {
 	}, 300);
 }
 
+// cette methode est appelée à chaque char entré dans les filterfields
 function performFilteringInputs(timeline, bandIndices, table) {
 	timerID = null;
+
+	// a chaque touche pressée, on supprime le résultats des recherches metadatas
+	window.metakeywords=[];
+	window.metadataIds=[];
 
 	var tr = table.rows[2];
 	var text = cleanString(tr.cells[0].firstChild.value);
 
 	if (text != null && text != "" && text != " ") {
-		//if (window.tb.rows[2].cells[1] === undefined) {
+		// Affiche un bouton pour ajouter le filtre aux checkbox
 		removeBtTmpCkb();
 		addBtTmpCkb(text);
-		//}
 	}
 	else {
 		removeBtTmpCkb();
@@ -478,68 +542,30 @@ function performFilteringInputs(timeline, bandIndices, table) {
 	else {
 		window.regexpfilter = null;
 	}
-	var filterMatcher = function(evt) {
-		if (window.regexpfilter==null && window.regexpckb.length==0) return true;
-		if (typeof window.regexpckb !== 'undefined') {
-			for (var i=0; i<window.regexpckb.length; i++) {
-				var regex = new RegExp(window.regexpckb[i], "i");
-				if (regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart()) || regex.test(evt.getClassName())) {
-					return true;
-				}
-			}
-		}
-		if (window.regexpfilter==null) return false;
-		{
-			var regex = new RegExp(window.regexpfilter, "i");
-			return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart()) || regex.test(evt.getClassName());
-		}
-	}
 
+	// highlights appeles apres chaque char
 	tr = table.rows[4];
-	var regexes = [];
-	var hasHighlights = false;
+	window.regexes = [];
 	for (var x = 0; x < tr.cells.length; x++) {
 		var input = tr.cells[x].firstChild;
 		var text2 = cleanString(input.value);
 		if (text2.length > 0) {
-			hasHighlights = true;
-			regexes.push(new RegExp(text2, "i"));
+			window.regexes.push(text2);
 		} else {
-			regexes.push(null);
+			window.regexes.push(null);
 		}
-	}
-	var highlightMatcher = hasHighlights ? function(evt) {
-		var text = evt.getText();
-		var description = evt.getDescription();
-		for (var x = 0; x < regexes.length; x++) {
-			var regex = regexes[x];
-			if (regex != null && (regex.test(text) || regex.test(description))) {
-				return x;
-			}
-		}
-		return -1;
-	} : null;
-
-	for (var i = 0; i < bandIndices.length; i++) {
-		var bandIndex = bandIndices[i];
-		timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
-		timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
 	}
 	timeline.paint();
 }
 
 function clearAllInputs(timeline, bandIndices, table) {
 	window.regexpfilter = null;
+	window.regexes = null;
+	window.metakeywords = [];
 	table.rows[2].cells[0].firstChild.value = "";
 	var tr = table.rows[4];
 	for (var x = 0; x < tr.cells.length; x++) {
 		tr.cells[x].firstChild.value = "";
-	}
-
-	for (var i = 0; i < bandIndices.length; i++) {
-		var bandIndex = bandIndices[i];
-		timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(null);
-		timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(null);
 	}
 	timeline.paint();
 }
@@ -552,12 +578,74 @@ function clearAllInputs(timeline, bandIndices, table) {
 //
 //
 
+function metaSearch() {
+	callAPIsearch();
+	searchInMetadata();
+	window.tl.paint();
+}
+
 
 function onCheck(timeline, bandIndices, table) {
 	performFilteringCkb(timeline, bandIndices, table);
 }
 
+function searchInMetadata() {
+	var keywords2search = [];
+	for (var i=0; i<window.regexpckb.length; i++) {
+		keywords2search.push(window.regexpckb[i]);
+	}
+	if (window.regexpfilter!=null) {
+		keywords2search.push(window.regexpfilter);
+	}
+	window.metadataIds = [];
+	for (var i=0;i<keywords2search.length;i++) {
+		if (keywords2search[i].length>0) {
+			window.url = "http://localhost/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+keywords2search[i]+"%22";
+			httpGet(window.url, function() {
+				if (window.pgContent != null) {
+					for (var j = 0; j<window.pgContent.length; j++) {
+						window.metadataIds.push(window.pgContent[j]);
+					}
+				}
+			});
+		}
+	}
+}
+
+// click sur bouton "metadata search"
+function callAPIsearch() {
+	window.metakeywords=[];
+	recursSearch(0);
+	window.tl.paint();
+}
+
+function recursSearch(z) {
+	if (z>3) return;
+	if (typeof(window.regexes) != 'undefined' && window.regexes != null && window.regexes[z] != null && window.regexes[z].length>0) {
+		var url = "http://localhost/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+window.regexes[z]+"%22";
+		httpGet(url, function() {
+			if (window.pgContent != null) {
+				var rst=window.pgContent[0];
+				for (var j = 1; j<window.pgContent.length; j++) {
+					rst = rst + "|" +window.pgContent[j];
+				}
+			}
+			if (typeof(rst)=='undefined' || rst.length==0) window.metakeywords.push(new RegExp("hfdjkeyvfiulegvbhrzvr","i"));
+			else {
+				var regex = new RegExp(rst, "i");
+				window.metakeywords.push(regex);
+			}
+			recursSearch(z+1);
+		});
+	} else {
+		window.metakeywords.push(new RegExp("hfdjkeyvfiulegvbhrzvr","i"));
+		recursSearch(z+1);
+	}
+}
+
 function performFilteringCkb(timeline, bandIndices, table) {
+	window.metakeywords=[];
+	window.metadataIds=[];
 	var list=[];
 	for(var i=0;i<table.rows.length; i++) {
 		var tr = table.rows[i];
@@ -577,38 +665,6 @@ function performFilteringCkb(timeline, bandIndices, table) {
 	for (var i=0; i<list.length; i++) {
 		window.regexpckb.push(list[i]);
 	}
-	var filterMatcher = function(evt) {
-		/*
-    console.log("   evt     "+Object.values(evt));
-    console.log("   KEYS    "+Object.keys(evt));
-
-    console.log("   obj    "+evt._id);
-    console.log("   ClassName    "+evt._classname);
-    if (evt._id === "e381") {
-    console.log("   evt     "+Object.values(evt));
-    console.log("   keys    "+Object.keys(evt));
-    console.log("   TRUC    "+evt._classname);
-  }
-  console.log("   obj    "+Object.keys(evt._obj));
-  */
-		if (window.regexpfilter==null && window.regexpckb.length==0) return true;
-		for (var i=0; i<window.regexpckb.length; i++) {
-			var regex = new RegExp(window.regexpckb[i], "i");
-			if (regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart()) || regex.test(evt.getClassName())) {
-				return true;
-			}
-		}
-		if (window.regexpfilter==null) return false;
-		{
-			var regex = new RegExp(window.regexpfilter, "i");
-			return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart()) || regex.test(evt.getClassName());
-		}
-	}
-
-	for (var i = 0; i < bandIndices.length; i++) {
-		var bandIndex = bandIndices[i];
-		timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
-	}
 	timeline.paint();
 }
 
@@ -618,20 +674,6 @@ function clearAllCkb(timeline, bandIndices, table, createfilt) {
 		tr.cells[0].firstChild.checked=false;
 	}
 	window.regexpckb = [];
-	if (!createfilt) {
-
-
-		var filterMatcher = function(evt) {
-			if (window.regexpfilter==null) return true;
-			var regex = new RegExp(window.regexpfilter, "i");
-			return regex.test(evt.getText()) || regex.test(evt.getDescription()) || regex.test(evt.getStart());
-		}
-
-		for (var i = 0; i < bandIndices.length; i++) {
-			var bandIndex = bandIndices[i];
-			timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(null);
-		}
-	}
 	timeline.paint();
 }
 
@@ -645,7 +687,6 @@ function clearAllCkb(timeline, bandIndices, table, createfilt) {
 
 function clickfleche() {
 	if (window.fltVisible===1) {
-		//console.log("visible 1 "+window.fltVisible);
 		if (screen.height < 1080) {
 			animateLeft(window.divfpfiltzone, 0, -24);
 		}
@@ -656,7 +697,6 @@ function clickfleche() {
 		window.fltVisible = 0;
 	}
 	else {
-		//console.log("visible 0 "+window.fltVisible);
 		if (screen.height < 1080) {
 			animateLeft(window.divfpfiltzone, -24, 0);
 		}
@@ -670,7 +710,6 @@ function clickfleche() {
 
 
 function animateLeft(obj, from, to){
-	//console.log("animateleft");
 	obj.style.left = from+"vw";
 	if (to<0) {
 		if (from > to) {
@@ -690,7 +729,6 @@ function animateLeft(obj, from, to){
 
 
 function enableFullPage() {
-	//console.log("res "+screen.height);
 	window.fltVisible=1;
 	var theotab = document.getElementById("fltLabelsButton").firstChild;
 	theotab.style.position = "relative";
@@ -702,9 +740,7 @@ function enableFullPage() {
 	document.getElementsByTagName("header")[0].style.display = "none";
 	document.getElementsByTagName("footer")[0].style.display = "none";
 	window.contentStyle = document.getElementById("content").style;
-	//window.contentPadding = document.getElementById("content").style.padding;
 	document.getElementById("content").style.padding = "0";
-	//window.contentMargin = document.getElementById("content").style.margin;
 	document.getElementById("content").style.margin = "0";
 	var b = document.getElementsByClassName("blocks")[0].children;
 	for (var i=0; i<b.length; i++) {
@@ -714,9 +750,6 @@ function enableFullPage() {
 			b[i].style.display = "none";
 		}
 		if (fw[0] === "timeline") {
-			//window.biStyle = b[i].style;
-			//window.bichildren2Style = b[i].children[2].style;
-			//window.bichildren4Style = b[i].children[4].style;
 			window.cadreExtMargin = b[i].style.margin;
 			b[i].style.margin = "0";
 			window.cadreExtPadding = b[i].style.padding;
@@ -728,15 +761,11 @@ function enableFullPage() {
 			window.tlHautHeight = b[i].children[2].style.height;
 			b[i].children[2].style.height = "90vh";
 			b[i].children[2].style.top = 0+"px";
-			//window.tlHautPos = b[i].children[2].style.position;
-			//b[i].children[2].style.position = "relative";
 			window.tlBasTop = b[i].children[4].style.top;
 			b[i].children[4].style.top = "0";
 			window.tlBasHeight = b[i].children[4].style.height;
 			b[i].children[4].style.height = "10vh";
 			b[i].children[4].style.top = b[i].children[2].clientHeight+"px";
-			//window.tlBasPos = b[i].children[4].style.position;
-			//b[i].children[4].style.position = "relative";
 		}
 	}
 
@@ -744,15 +773,13 @@ function enableFullPage() {
 		window.divfp.parentNode.removeChild(window.divfp);
 	}
 	window.divfp = window.tl.getDocument().createElement("div");
-	//window.divfp = document.createElement("div");
 	window.divfp.className = "fullPage";
 	delete window.fpimg;
 	window.fpimg = document.createElement('img');
 	window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/exit-fullscreen_white.svg');
 	window.divfp.appendChild(window.fpimg);
 	window.fpimg.style.marginRight="0.15em";
-	window.fpimg.setAttribute('onclick','disableFullPage();'); // for FF
-	//window.fpimg.onclick = function() {disableFullPage();}; // for IE
+	window.fpimg.setAttribute('onclick','disableFullPage();');
 	window.tl._containerDiv.appendChild(window.divfp);
 	window.divfp.style.zIndex="100";
 	window.divfp.style.position = "absolute";
@@ -764,7 +791,6 @@ function enableFullPage() {
 		window.divfpfiltzone = window.tl.getDocument().createElement("div");
 		var divFleche = document.createElement('div');
 		window.fleche = document.createElement('img');
-		//window.divfpfiltzone = document.createElement("div");
 		window.divfpfiltzone.id = "fullPageFiltersZone";
 		window.divfpfiltzone.style.position = "absolute";
 		window.divfpfiltzone.style.top = "0%";
@@ -809,18 +835,9 @@ function enableFullPage() {
 		divFleche.style.top = "47%";
 		divFleche.style.zIndex = "101";
 		divFleche.style.backgroundColor = "rgb(97, 87, 107)";
-		/*
-    divFleche.addEventListener("mouseover", function(event) {
-    event.target.style.display = "block";
-  });
-  divFleche.addEventListener("mouseleave", function(event) {
-  event.target.style.display = "none";
-});
-*/
 		window.divfpfiltzone.appendChild(divFleche);
 
 		window.fleche.setAttribute('onclick','clickfleche();'); // for FF
-		//window.fleche.onclick = function() {clickfleche();}; // for IE
 	}
 }
 
@@ -831,8 +848,6 @@ function disableFullPage() {
 	document.getElementsByTagName("header")[0].style.display = "block";
 	document.getElementsByTagName("footer")[0].style.display = "block";
 	document.getElementById("content").style = window.contentStyle;
-	//document.getElementById("content").style.padding = window.contentPadding;
-	//document.getElementById("content").style.margin = window.contentMargin;
 	var b = document.getElementsByClassName("blocks")[0].children;
 	for (var i=0; i<b.length; i++) {
 		var fw = [];
@@ -841,18 +856,13 @@ function disableFullPage() {
 			b[i].style.display = "block";
 		}
 		if (fw[0] === "timeline") {
-			//b[i].style = window.biStyle;
-			//b[i].children[2].style = window.bichildren2Style;
-			//b[i].children[4].style = window.bichildren4Style;
 			b[i].style.margin = window.cadreExtMargin;
 			b[i].style.padding = window.cadreExtPadding;
 			b[i].style.height = window.cadreExtHeight;
 			b[i].style.width = window.cadreExtWidth;
 			b[i].children[2].style.height = window.tlHautHeight;
-			//b[i].children[2].style.position = window.tlHautPos;
 			b[i].children[4].style.top = window.tlBasTop;
 			b[i].children[4].style.height = window.tlBasHeight;
-			//b[i].children[4].style.position = window.tlBasPos;
 		}
 	}
 	document.getElementsByClassName("blocks")[0].appendChild(document.getElementById("filters"));
@@ -862,6 +872,7 @@ function disableFullPage() {
 	}
 	addFullPageButton(window.tlid);
 	if (window.tb.firstChild.children[4] != null) {
-		performFilteringInputs(window.tl, [0,1], window.tb);
+		//performFilteringInputs(window.tl, [0,1], window.tb);
+		metaSearch();
 	}
 }
