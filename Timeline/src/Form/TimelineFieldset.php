@@ -138,18 +138,6 @@ class TimelineFieldset extends Fieldset
     ])
 
     ->add([
-      'name' => 'o:block[__blockIndex__][o:data][domainName]',
-      'type' => Element\text::class,
-      'options' => [
-        'label' => 'Domain Name', // @translate
-        'info' => 'Enter your domain name without "http://" at the beginning and without "/" at the end.', // @translate
-      ],
-      'attributes' => [
-        'required' => true,
-      ],
-    ])
-
-    ->add([
       'name' => 'o:block[__blockIndex__][o:data][UserFilters]',
       'type' => Element\Select::class,
       'options' => [

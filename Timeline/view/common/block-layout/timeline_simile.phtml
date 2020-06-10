@@ -26,7 +26,6 @@ $escape = $this->plugin('escapeHtml');
         params.filters = <?= json_encode($data['filters']) ?>;
         params.userFilters = <?= json_encode($data['UserFilters']) ?>;
         params.UserCheckbox = <?= json_encode($data['UserCheckbox']) ?>;
-        params.domainName = <?= json_encode($data['domainName']) ?>;
 
         oTimeline.loadTimeline(
             'timeline-<?= $block->id() ?>',

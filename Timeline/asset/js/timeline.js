@@ -595,7 +595,7 @@ function searchInMetadata() {
 	window.metadataIds = [];
 	for (var i=0;i<keywords2search.length;i++) {
 		if (keywords2search[i].length>0) {
-			window.url = "http://"+window.params.domainName+"/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+keywords2search[i]+"%22";
+			window.url = "http://"+window.location.host+"/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+keywords2search[i]+"%22";
 			httpGet(window.url, function() {
 				if (window.pgContent != null) {
 					for (var j = 0; j<window.pgContent.length; j++) {
@@ -617,7 +617,7 @@ function callAPIsearch() {
 function recursSearch(z) {
 	if (z>3) return;
 	if (typeof(window.regexes) != 'undefined' && window.regexes != null && window.regexes[z] != null && window.regexes[z].length>0) {
-		var url = "http://"+window.params.domainName+"/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+window.regexes[z]+"%22";
+		var url = "http://"+window.location.host+"/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+window.regexes[z]+"%22";
 		httpGet(url, function() {
 			if (window.pgContent != null) {
 				var rst=window.pgContent[0];
