@@ -61,6 +61,12 @@ var oTimeline = {
 	},
 
 	loadTimeline: function(timelineId, timelineData, params) {
+
+		var pageUrlIndex = window.location.href.lastIndexOf("/s/");
+		console.log("yes "+pageUrlIndex);
+		window.pagePrefix = window.location.href.slice(0, pageUrlIndex)+"/";
+		console.log(pagePrefix);
+
 		oTimeline._monkeyPatchFillInfoBubble();
 		var eventSource = new Timeline.DefaultEventSource();
 
@@ -129,6 +135,7 @@ var oTimeline = {
 
 				var evts = eventSource._events._events._a;
 				var evt = null;
+				window.listEvts = [];
 				window.url = "";
 				window.pgContent = "";
 				evt = eventSource._events._events._a[i]._obj;
@@ -219,7 +226,7 @@ function addFullPageButton(timelineId) {
 	window.divfp.className = "fullPage";
 	delete window.fpimg;
 	window.fpimg = document.createElement('img');
-	window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/fullscreen_white.svg');
+	window.fpimg.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/fullscreen_white.svg');
 	window.divfp.appendChild(window.fpimg);
 	window.fpimg.style.marginRight="0.15em";
 	window.fpimg.setAttribute('onclick','enableFullPage();'); // for FF
@@ -232,6 +239,23 @@ function addFullPageButton(timelineId) {
 	window.divfp.style.cursor = "pointer";
 }
 
+function resetListEvents(band, op, evt, els) {
+	if (op=='paintStarting') {
+		console.log("clearlistpaint");
+		window.listEvts=[];
+	}
+}
+
+/*function exportCSV() {
+	console.log("j'exporte "+window.listEvts.length);
+	var baseLink = getBaseLinkItems();
+	console.log("link "+baseLink+window.metadataIds[0]);
+}*/
+
+function getBaseLinkItems() {
+	var baseLinkIndex = window.listEvts[0].getLink().lastIndexOf("/");
+	return window.listEvts[0].getLink().slice(0, baseLinkIndex+1);
+}
 
 //
 //
@@ -240,8 +264,7 @@ function addFullPageButton(timelineId) {
 //
 
 
-function recurseDomChildren(start, position, display)
-{
+function recurseDomChildren(start, position, display) {
 	var nodes;
 	if(start.children)
 	{
@@ -250,8 +273,7 @@ function recurseDomChildren(start, position, display)
 	}
 }
 
-function loopNodeChildren(nodes, position, display)
-{
+function loopNodeChildren(nodes, position, display) {
 	var node;
 	for(var i=0;i<nodes.length;i++)
 	{
@@ -270,24 +292,15 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	window.regexpckb = [];
 
 	// la row0 a deja ete inseree: elle contient le bouton "clearall"
-	// la row1 contient le bouton qui active la recherche dans les metadonnees
-	tr = table.insertRow(1);
-	td = tr.insertCell(0);
-	td.style.borderBottom = "none";
-	window.metaBt = document.createElement("button");
-	window.metaBt.innerHTML = "Chercher dans les metadonnées";
-	td.appendChild(window.metaBt);
-	window.metaBt.addEventListener("click", metaSearch);
 
-
-	// la row2 contiendra le label Filter
-	var tr = table.insertRow(2);
+	// la row1 contiendra le label Filter
+	var tr = table.insertRow(1);
 	var td = tr.insertCell(0);
 	td.style.borderBottomStyle = "none";
 	td.innerHTML = "Filter :";
 
-	// la row3 contiendra le textfield pour le filtre
-	tr = table.insertRow(3);
+	// la row2 contiendra le textfield pour le filtre
+	tr = table.insertRow(2);
 	window.tr2 = tr;
 	td = tr.insertCell(0);
 	td.style.borderBottomStyle = "none";
@@ -296,6 +309,21 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	input.id="filtreInput";
 	SimileAjax.DOM.registerEvent(input, "keydown", handler);
 	td.appendChild(input);
+
+	// la row3 contient le bouton qui active la recherche dans les metadonnees
+	tr = table.insertRow(3);
+	td = tr.insertCell(0);
+	td.style.borderBottom = "none";
+	window.metaBt = document.createElement("button");
+	window.metaBt.innerHTML = "Chercher dans les metadonnées";
+	td.appendChild(window.metaBt);
+	window.metaBt.addEventListener("click", metaSearch);
+	td = tr.insertCell(1);
+	td.style.borderBottom = "none";
+	/*var exportBt = document.createElement("button");
+	exportBt.innerHTML = "exporter en CSV";
+	td.appendChild(exportBt);
+	exportBt.addEventListener("click", exportCSV);*/
 
 	// la row4 contient le label "highlight"
 	tr = table.insertRow(4);
@@ -321,15 +349,56 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 		divColor.style.background = theme.event.highlightColors[i];
 		td.appendChild(divColor);
 	}
+	table.rows[3].cells[0].style.width = td.style.width;
 
 	// TODO definir le setfilter xxxx
 	window.regexpckb = [];
 	window.regexpfilter = null;
 	window.metadataIds = [];
 
-	// cette fonction esy appelée à chaque affichage, pour chaque item
-	var filterMatcher = function(evt) {
-		if (window.regexpfilter==null && window.regexpckb.length==0) return true;
+	// cette fonction est appelée à chaque affichage, pour chaque item
+
+	var filterMatcherbd0 = function(evt) {
+		if (window.regexpfilter==null && window.regexpckb.length==0) {
+			window.listEvts.push(evt);
+			return true;
+		}
+		if (typeof(window.metadataIds) != 'undefined' && window.metadataIds.length > 0) {
+			for (var i=0; i<window.metadataIds.length; i++) {
+				var regex = new RegExp(window.metadataIds[i], "i");
+				if (regex.test(evt.getLink())) {
+					window.listEvts.push(evt);
+					if (i==0) {
+						console.log("tralala "+evt.getStart());
+						focus(evt.getStart());
+					}
+					return true;
+				}
+			}
+		}
+		else {
+			for (var i=0; i<window.regexpckb.length; i++) {
+				var regex = new RegExp(window.regexpckb[i], "i");
+				if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+					window.listEvts.push(evt);
+					return true;
+				}
+			}
+			if (window.regexpfilter==null) return false;
+			else {
+				var regex = new RegExp(window.regexpfilter, "i");
+				if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+					window.listEvts.push(evt);
+					return true;
+				}
+			}
+		}
+	}
+
+	var filterMatcherbd1 = function(evt) {
+		if (window.regexpfilter==null && window.regexpckb.length==0) {
+			return true;
+		}
 		if (typeof(window.metadataIds) != 'undefined' && window.metadataIds.length > 0) {
 			for (var i=0; i<window.metadataIds.length; i++) {
 				var regex = new RegExp(window.metadataIds[i], "i");
@@ -348,7 +417,9 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 			if (window.regexpfilter==null) return false;
 			else {
 				var regex = new RegExp(window.regexpfilter, "i");
-				return regex.test(evt.getText()) || regex.test(evt.getDescription());
+				if (regex.test(evt.getText()) || regex.test(evt.getDescription())) {
+					return true;
+				}
 			}
 		}
 	}
@@ -375,16 +446,18 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 
 	for (var i = 0; i < bandIndices.length; i++) {
 		var bandIndex = bandIndices[i];
-		timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcher);
+		console.log(timeline.getBand(bandIndex).getEventPainter());
+		if (i==0) timeline.getBand(bandIndex).getEventPainter()._eventPaintListeners.push(resetListEvents);
+		if (i==0) timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcherbd0);
+		if (i==1) timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcherbd1);
 		timeline.getBand(bandIndex).getEventPainter().setHighlightMatcher(highlightMatcher);
 	}
 	timeline.paint();
-
 }
 
 function addBtTmpCkb(text) {
 	if (window.params.UserCheckbox === "0") {
-		var tr = window.tb.rows[3];
+		var tr = window.tb.rows[2];
 		var td = tr.insertCell(1);
 		td.style.borderBottomStyle = "none";
 		var bt = document.createElement("button");
@@ -415,8 +488,8 @@ function addBtTmpCkb(text) {
 }
 
 function removeBtTmpCkb() {
-	if (window.tb.rows[3].cells[1] != null) {
-		window.tb.rows[3].deleteCell(1);
+	if (window.tb.rows[2].cells[1] != null) {
+		window.tb.rows[2].deleteCell(1);
 	}
 }
 
@@ -485,7 +558,6 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
 	}
 }
 
-
 function cleanString(s) {
 	return s.replace(/^\s+/, '').replace(/\s+$/, '');
 }
@@ -517,7 +589,7 @@ function performFilteringInputs(timeline, bandIndices, table) {
 	window.metakeywords=[];
 	window.metadataIds=[];
 
-	var tr = table.rows[3];
+	var tr = table.rows[2];
 	var text = cleanString(tr.cells[0].firstChild.value);
 
 	if (text != null && text != "" && text != " ") {
@@ -543,7 +615,6 @@ function performFilteringInputs(timeline, bandIndices, table) {
 	for (var x = 0; x < tr.cells.length; x++) {
 		var input = tr.cells[x].firstChild;
 		var text2 = cleanString(input.value);
-		console.log(text2);
 		if (text2.length > 0) {
 			window.regexes.push(text2);
 		} else {
@@ -557,7 +628,7 @@ function clearAllInputs(timeline, bandIndices, table) {
 	window.regexpfilter = null;
 	window.regexes = null;
 	window.metakeywords = [];
-	table.rows[3].cells[0].firstChild.value = "";
+	table.rows[2].cells[0].firstChild.value = "";
 	var tr = table.rows[5];
 	for (var x = 0; x < tr.cells.length; x++) {
 		tr.cells[x].firstChild.value = "";
@@ -574,11 +645,26 @@ function clearAllInputs(timeline, bandIndices, table) {
 //
 
 function metaSearch() {
+	performFilteringInputs(window.tl, [0,1], window.tb);
 	callAPIsearch();
 	searchInMetadata();
+	console.log("metasearch");
+	//focus();
+	//var td = window.tb.rows[3].insertCell(1);
 	window.tl.paint();
+	/*var exportBt = document.createElement("button");
+	exportBt.innerHTML = "exporter en CSV";
+	td.appendChild(exportBt);
+	exportBt.addEventListener("click", exportCSV);
+	td.style.borderBottomStyle = "none";*/
 }
 
+function focus(date) {
+	// var link = getBaseLinkItems()+window.metadataIds[0];
+	// console.log("focus "+link);
+	console.log("focusdate "+date);
+	window.tl.getBand(0).setCenterVisibleDate(date);
+}
 
 function onCheck(timeline, bandIndices, table) {
 	performFilteringCkb(timeline, bandIndices, table);
@@ -595,7 +681,7 @@ function searchInMetadata() {
 	window.metadataIds = [];
 	for (var i=0;i<keywords2search.length;i++) {
 		if (keywords2search[i].length>0) {
-			window.url = "http://"+window.location.host+"/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+keywords2search[i]+"%22";
+			window.url = window.pagePrefix+"api/items?per_page=100000000000000&fulltext_search=%22"+keywords2search[i]+"%22";
 			httpGet(window.url, function() {
 				if (window.pgContent != null) {
 					for (var j = 0; j<window.pgContent.length; j++) {
@@ -605,6 +691,7 @@ function searchInMetadata() {
 			});
 		}
 	}
+	console.log("truc "+window.metadataIds.length);
 }
 
 // click sur bouton "metadata search"
@@ -617,7 +704,7 @@ function callAPIsearch() {
 function recursSearch(z) {
 	if (z>3) return;
 	if (typeof(window.regexes) != 'undefined' && window.regexes != null && window.regexes[z] != null && window.regexes[z].length>0) {
-		var url = "http://"+window.location.host+"/omeka-s/api/items?per_page=100000000000000&fulltext_search=%22"+window.regexes[z]+"%22";
+		var url = window.pagePrefix+"api/items?per_page=100000000000000&fulltext_search=%22"+window.regexes[z]+"%22";
 		httpGet(url, function() {
 			if (window.pgContent != null) {
 				var rst=window.pgContent[0];
@@ -683,27 +770,16 @@ function clearAllCkb(timeline, bandIndices, table, createfilt) {
 
 function clickfleche() {
 	if (window.fltVisible===1) {
-		if (screen.height < 1080) {
-			animateLeft(window.divfpfiltzone, 0, -24);
-		}
-		else {
-			animateLeft(window.divfpfiltzone, 0, -17);
-		}
-		window.fleche.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/flecheDroite.svg');
+		animateLeft(window.divfpfiltzone, 0, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)));
+		window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheDroite.svg');
 		window.fltVisible = 0;
 	}
 	else {
-		if (screen.height < 1080) {
-			animateLeft(window.divfpfiltzone, -24, 0);
-		}
-		else {
-			animateLeft(window.divfpfiltzone, -17, 0);
-		}
-		window.fleche.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/flecheGauche.svg');
+		animateLeft(window.divfpfiltzone, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)), 0);
+		window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheGauche.svg');
 		window.fltVisible = 1;
 	}
 }
-
 
 function animateLeft(obj, from, to){
 	obj.style.left = from+"vw";
@@ -722,7 +798,6 @@ function animateLeft(obj, from, to){
 		}
 	}
 }
-
 
 function enableFullPage() {
 	window.fltVisible=1;
@@ -772,10 +847,10 @@ function enableFullPage() {
 	window.divfp.className = "fullPage";
 	delete window.fpimg;
 	window.fpimg = document.createElement('img');
-	window.fpimg.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/exit-fullscreen_white.svg');
+	window.fpimg.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/exit-fullscreen_white.svg');
 	window.divfp.appendChild(window.fpimg);
 	window.fpimg.style.marginRight="0.15em";
-	window.fpimg.setAttribute('onclick','disableFullPage();');
+	window.fpimg.setAttribute('onclick','disableFullPage()');
 	window.tl._containerDiv.appendChild(window.divfp);
 	window.divfp.style.zIndex="100";
 	window.divfp.style.position = "absolute";
@@ -792,19 +867,32 @@ function enableFullPage() {
 		window.divfpfiltzone.style.top = "0%";
 		window.divfpfiltzone.style.zIndex="101";
 		window.divfpfiltzone.style.height = "100vh";
+
+		divFleche.id = "divFleche";
+		divFleche.appendChild(fleche);
+		divFleche.style.position = "absolute";
+		divFleche.style.width = "2vw";
+		divFleche.style.right = "0%";
+		divFleche.style.top = "47%";
+		divFleche.style.zIndex = "101";
+		divFleche.style.backgroundColor = "rgb(97, 87, 107)";
+		window.divfpfiltzone.appendChild(divFleche);
+
 		if (screen.height < 864) {
 			window.divfpfiltzone.style.width = "26vw";
 			divFleche.style.height = "5vh";
-			animateLeft(window.divfpfiltzone, 0, -24);
-			window.fleche.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/flecheDroite.svg');
+			animateLeft(window.divfpfiltzone, 0, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)));
+			window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheDroite.svg');
 			window.fltVisible = 0;
 
 		}
 		else {
 			window.divfpfiltzone.style.width = "19vw";
 			divFleche.style.height = "4vh";
-			animateLeft(window.divfpfiltzone, 0, -17);
-			window.fleche.setAttribute('src', '/omeka-s/modules/Timeline/asset/img/flecheDroite.svg');
+			console.log(divFleche.style.width);
+			animateLeft(window.divfpfiltzone, 0, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)));
+			// animateLeft(window.divfpfiltzone, 0, -17);
+			window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheDroite.svg');
 			window.fltVisible = 0;
 		}
 		window.divfpfilt = window.tl.getDocument().createElement("div");
@@ -823,15 +911,6 @@ function enableFullPage() {
 		window.divfpfiltzone.appendChild(window.divfpfilt);
 		window.tl._containerDiv.appendChild(divfpfiltzone);
 
-		divFleche.id = "divFleche";
-		divFleche.appendChild(fleche);
-		divFleche.style.position = "absolute";
-		divFleche.style.width = "10%";
-		divFleche.style.right = "0%";
-		divFleche.style.top = "47%";
-		divFleche.style.zIndex = "101";
-		divFleche.style.backgroundColor = "rgb(97, 87, 107)";
-		window.divfpfiltzone.appendChild(divFleche);
 
 		window.fleche.setAttribute('onclick','clickfleche();'); // for FF
 	}
