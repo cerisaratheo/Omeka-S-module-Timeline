@@ -63,9 +63,7 @@ var oTimeline = {
 	loadTimeline: function(timelineId, timelineData, params) {
 
 		var pageUrlIndex = window.location.href.lastIndexOf("/s/");
-		console.log("yes "+pageUrlIndex);
 		window.pagePrefix = window.location.href.slice(0, pageUrlIndex)+"/";
-		console.log(pagePrefix);
 
 		oTimeline._monkeyPatchFillInfoBubble();
 		var eventSource = new Timeline.DefaultEventSource();
@@ -197,6 +195,22 @@ var oTimeline = {
 	}
 };
 
+function httpGetCsv(url, hdler) {
+	if (window.XMLHttpRequest) {
+		xmlhttp=new XMLHttpRequest();
+	}
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		{
+			var rep = xmlhttp.responseText;
+			hdler(rep);
+		}
+	}
+	xmlhttp.open("GET", url, false );
+	xmlhttp.send();
+}
+
 function httpGet(url, hdler) {
 	if (window.XMLHttpRequest) {
 		xmlhttp=new XMLHttpRequest();
@@ -241,16 +255,47 @@ function addFullPageButton(timelineId) {
 
 function resetListEvents(band, op, evt, els) {
 	if (op=='paintStarting') {
-		console.log("clearlistpaint");
 		window.listEvts=[];
 	}
 }
 
-/*function exportCSV() {
-	console.log("j'exporte "+window.listEvts.length);
+function recursCSV(baseurl, i) {
+	if (i>=window.metadataIds.length) return;
+	var url = baseurl+window.metadataIds[i]+".csv";
+	httpGetCsv(url, function(rep) {
+		var indice=rep.indexOf('\n');
+		var s=rep;
+		if (i>0) s=rep.slice(indice+1);
+		window.tabcsv += s;
+		recursCSV(baseurl, i+1);
+	});
+}
+
+function getDate() {
+	var date = new Date(Date.now());
+	var annee = date.getFullYear();
+	var mois = date.getMonth() + 1;      // "+ 1" because the 1st month is 0
+	var jour = date.getDate();
+	var heure = date.getHours();
+	var minutes = date.getMinutes();
+	var secondes = date.getSeconds()
+
+  return (annee+""+mois+""+jour+""+heure+""+minutes+""+secondes);
+}
+
+function exportCSV() {
 	var baseLink = getBaseLinkItems();
-	console.log("link "+baseLink+window.metadataIds[0]);
-}*/
+	window.tabcsv = "";
+	recursCSV(baseLink, 0);
+  var encodedURI = "data:text/plain,"+encodeURIComponent(window.tabcsv);
+	var link = document.createElement("a");
+	link.setAttribute("href", encodedURI);
+	link.setAttribute("download", "export"+getDate()+".csv");
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+	delete link;
+}
 
 function getBaseLinkItems() {
 	var baseLinkIndex = window.listEvts[0].getLink().lastIndexOf("/");
@@ -297,7 +342,7 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	var tr = table.insertRow(1);
 	var td = tr.insertCell(0);
 	td.style.borderBottomStyle = "none";
-	td.innerHTML = "Filter :";
+	td.innerHTML = "filtrer :";
 
 	// la row2 contiendra le textfield pour le filtre
 	tr = table.insertRow(2);
@@ -320,17 +365,13 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 	window.metaBt.addEventListener("click", metaSearch);
 	td = tr.insertCell(1);
 	td.style.borderBottom = "none";
-	/*var exportBt = document.createElement("button");
-	exportBt.innerHTML = "exporter en CSV";
-	td.appendChild(exportBt);
-	exportBt.addEventListener("click", exportCSV);*/
 
 	// la row4 contient le label "highlight"
 	tr = table.insertRow(4);
 	td = tr.insertCell(0);
 	window.hl = td;
 	td.style.borderBottomStyle = "none";
-	td.innerHTML = "Highlights:";
+	td.innerHTML = "surligner :";
 
 	// la row5 contient les N highights text field
 	tr = table.insertRow(5);
@@ -369,7 +410,6 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 				if (regex.test(evt.getLink())) {
 					window.listEvts.push(evt);
 					if (i==0) {
-						console.log("tralala "+evt.getStart());
 						focus(evt.getStart());
 					}
 					return true;
@@ -446,7 +486,6 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 
 	for (var i = 0; i < bandIndices.length; i++) {
 		var bandIndex = bandIndices[i];
-		console.log(timeline.getBand(bandIndex).getEventPainter());
 		if (i==0) timeline.getBand(bandIndex).getEventPainter()._eventPaintListeners.push(resetListEvents);
 		if (i==0) timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcherbd0);
 		if (i==1) timeline.getBand(bandIndex).getEventPainter().setFilterMatcher(filterMatcherbd1);
@@ -518,11 +557,12 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
 		var td = tr.insertCell(tr.cells.length);
 		td.style.borderBottomStyle = "none";
 		var button = document.createElement("button");
-		button.innerHTML = "Clear All";
+		button.innerHTML = "effacer";
 		SimileAjax.DOM.registerEvent(button, "click", function() {
 			clearAllCkb(timeline, bandIndices, tableflt, false);
 			clearAllInputs(timeline, bandIndices, tablelabels);
 			removeBtTmpCkb();
+			rmBtExport();
 		});
 		td.appendChild(button);
 	}
@@ -583,6 +623,7 @@ function onKeyPress(timeline, bandIndices, table) {
 
 // cette methode est appelée à chaque char entré dans les filterfields
 function performFilteringInputs(timeline, bandIndices, table) {
+	rmBtExport();
 	timerID = null;
 
 	// a chaque touche pressée, on supprime le résultats des recherches metadatas
@@ -644,25 +685,31 @@ function clearAllInputs(timeline, bandIndices, table) {
 //
 //
 
+function crBtExport() {
+	var td = window.tb.rows[3].insertCell(1);
+	var exportBt = document.createElement("button");
+	exportBt.innerHTML = "exporter en CSV (peut prendre un certain temps)";
+	td.appendChild(exportBt);
+	exportBt.addEventListener("click", exportCSV);
+	td.style.borderBottomStyle = "none";
+}
+
+function rmBtExport() {
+	if (window.tb.rows[3].cells[1] != null) {
+		window.tb.rows[3].deleteCell(1);
+	}
+}
+
 function metaSearch() {
 	performFilteringInputs(window.tl, [0,1], window.tb);
 	callAPIsearch();
 	searchInMetadata();
-	console.log("metasearch");
 	//focus();
-	//var td = window.tb.rows[3].insertCell(1);
 	window.tl.paint();
-	/*var exportBt = document.createElement("button");
-	exportBt.innerHTML = "exporter en CSV";
-	td.appendChild(exportBt);
-	exportBt.addEventListener("click", exportCSV);
-	td.style.borderBottomStyle = "none";*/
+	crBtExport();
 }
 
 function focus(date) {
-	// var link = getBaseLinkItems()+window.metadataIds[0];
-	// console.log("focus "+link);
-	console.log("focusdate "+date);
 	window.tl.getBand(0).setCenterVisibleDate(date);
 }
 
@@ -691,7 +738,6 @@ function searchInMetadata() {
 			});
 		}
 	}
-	console.log("truc "+window.metadataIds.length);
 }
 
 // click sur bouton "metadata search"
@@ -889,7 +935,7 @@ function enableFullPage() {
 		else {
 			window.divfpfiltzone.style.width = "19vw";
 			divFleche.style.height = "4vh";
-			console.log(divFleche.style.width);
+			//console.log(divFleche.style.width);
 			animateLeft(window.divfpfiltzone, 0, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)));
 			// animateLeft(window.divfpfiltzone, 0, -17);
 			window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheDroite.svg');
@@ -947,7 +993,7 @@ function disableFullPage() {
 	}
 	addFullPageButton(window.tlid);
 	if (window.tb.firstChild.children[5] != null) {
-		//performFilteringInputs(window.tl, [0,1], window.tb);
 		metaSearch();
+		if (window.metadataIds.length==0) rmBtExport();
 	}
 }
