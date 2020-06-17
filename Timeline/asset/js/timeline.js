@@ -134,6 +134,7 @@ var oTimeline = {
 				var evts = eventSource._events._events._a;
 				var evt = null;
 				window.listEvts = [];
+				window.baseurl = "";
 				window.url = "";
 				window.pgContent = "";
 				evt = eventSource._events._events._a[i]._obj;
@@ -195,7 +196,7 @@ var oTimeline = {
 	}
 };
 
-function httpGetCsv(url, hdler) {
+function httpGet(url, hdler) {
 	if (window.XMLHttpRequest) {
 		xmlhttp=new XMLHttpRequest();
 	}
@@ -211,7 +212,7 @@ function httpGetCsv(url, hdler) {
 	xmlhttp.send();
 }
 
-function httpGet(url, hdler) {
+function httpGetIds(url, hdler) {
 	if (window.XMLHttpRequest) {
 		xmlhttp=new XMLHttpRequest();
 	}
@@ -262,7 +263,7 @@ function resetListEvents(band, op, evt, els) {
 function recursCSV(baseurl, i) {
 	if (i>=window.metadataIds.length) return;
 	var url = baseurl+window.metadataIds[i]+".csv";
-	httpGetCsv(url, function(rep) {
+	httpGet(url, function(rep) {
 		var indice=rep.indexOf('\n');
 		var s=rep;
 		if (i>0) s=rep.slice(indice+1);
@@ -298,8 +299,13 @@ function exportCSV() {
 }
 
 function getBaseLinkItems() {
-	var baseLinkIndex = window.listEvts[0].getLink().lastIndexOf("/");
-	return window.listEvts[0].getLink().slice(0, baseLinkIndex+1);
+	if (window.baseurl.length==0) {
+		window.baseurl =  window.listEvts[0].getLink();
+		var ii = window.baseurl.lastIndexOf("/");
+		var s = window.baseurl.slice(0, ii+1);
+		window.baseurl = s;
+	}
+	return window.baseurl;
 }
 
 //
@@ -409,9 +415,6 @@ function setupInputFiltersHighlights(timeline, bandIndices, theme, table, handle
 				var regex = new RegExp(window.metadataIds[i], "i");
 				if (regex.test(evt.getLink())) {
 					window.listEvts.push(evt);
-					if (i==0) {
-						focus(evt.getStart());
-					}
 					return true;
 				}
 			}
@@ -704,13 +707,31 @@ function metaSearch() {
 	performFilteringInputs(window.tl, [0,1], window.tb);
 	callAPIsearch();
 	searchInMetadata();
-	//focus();
+	if (window.metadataIds==null || window.metadataIds.length <1) return;
 	window.tl.paint();
+	focus();
 	crBtExport();
 }
 
-function focus(date) {
-	window.tl.getBand(0).setCenterVisibleDate(date);
+function focus() {
+	var url = getBaseLinkItems() + window.metadataIds[0];
+	httpGet(url, function(rep) {
+		var indice = rep.indexOf('Date');
+		var s = rep;
+		s = rep.slice(indice);
+		indice = s.indexOf('lang="">');
+		s = s.slice(indice);
+		indice = s.indexOf('\n');
+		s = s.slice(indice);
+		indice = s.indexOf('\n');
+		s = s.slice(indice+1);
+		indice = s.indexOf('\n');
+		s = s.slice(indice-28);
+		indice = s.indexOf(' ');
+		s = s.substr(0, indice);
+		console.log(s);
+		window.tl.getBand(0).setCenterVisibleDate(Timeline.DateTime.parseGregorianDateTime(s));
+	})
 }
 
 function onCheck(timeline, bandIndices, table) {
@@ -729,7 +750,7 @@ function searchInMetadata() {
 	for (var i=0;i<keywords2search.length;i++) {
 		if (keywords2search[i].length>0) {
 			window.url = window.pagePrefix+"api/items?per_page=100000000000000&fulltext_search=%22"+keywords2search[i]+"%22";
-			httpGet(window.url, function() {
+			httpGetIds(window.url, function() {
 				if (window.pgContent != null) {
 					for (var j = 0; j<window.pgContent.length; j++) {
 						window.metadataIds.push(window.pgContent[j]);
@@ -751,7 +772,7 @@ function recursSearch(z) {
 	if (z>3) return;
 	if (typeof(window.regexes) != 'undefined' && window.regexes != null && window.regexes[z] != null && window.regexes[z].length>0) {
 		var url = window.pagePrefix+"api/items?per_page=100000000000000&fulltext_search=%22"+window.regexes[z]+"%22";
-		httpGet(url, function() {
+		httpGetIds(url, function() {
 			if (window.pgContent != null) {
 				var rst=window.pgContent[0];
 				for (var j = 1; j<window.pgContent.length; j++) {
