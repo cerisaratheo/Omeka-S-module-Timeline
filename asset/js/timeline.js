@@ -126,6 +126,7 @@ var oTimeline = {
 			// figure out what's creating the timelineData json
 			// console.log("json: ", json);
 			// console.log("timelineData: ", timelineData);
+			window.tldata = timelineData;
 			if (json.events.length > 0) {
 				eventSource.loadJSON(json, url);
 
@@ -868,119 +869,25 @@ function animateLeft(obj, from, to){
 
 function enableFullPage() {
 	window.fltVisible=1;
-	var theotab = document.getElementById("fltLabelsButton").firstChild;
-	theotab.style.position = "relative";
-	recurseDomChildren(theotab, "relative", "block");
-
-	if (document.getElementById("user-bar") != null) {
-		document.getElementById("user-bar").style.display = "none";
-	}
-	document.getElementsByTagName("header")[0].style.display = "none";
-	document.getElementsByTagName("footer")[0].style.display = "none";
-	window.contentStyle = document.getElementById("content").style;
-	document.getElementById("content").style.padding = "0";
-	document.getElementById("content").style.margin = "0";
 	var b = document.getElementsByClassName("blocks")[0].children;
 	for (var i=0; i<b.length; i++) {
 		var fw = [];
 		fw = b[i].className.split(" ");
-		if (fw[0] != "timeline" && b[i].tagName != "SCRIPT") {
-			b[i].style.display = "none";
+		if (fw[0] == "timeline") {
+			var tmln = b[i];
 		}
-		if (fw[0] === "timeline") {
-			window.cadreExtMargin = b[i].style.margin;
-			b[i].style.margin = "0";
-			window.cadreExtPadding = b[i].style.padding;
-			b[i].style.padding = "0";
-			window.cadreExtHeight = b[i].style.height;
-			b[i].style.height = "100vh";
-			window.cadreExtWidth = b[i].style.width;
-			b[i].style.width = "100vw";
-			window.tlHautHeight = b[i].children[2].style.height;
-			b[i].children[2].style.height = "90vh";
-			b[i].children[2].style.top = 0+"px";
-			window.tlBasTop = b[i].children[4].style.top;
-			b[i].children[4].style.top = "0";
-			window.tlBasHeight = b[i].children[4].style.height;
-			b[i].children[4].style.height = "10vh";
-			b[i].children[4].style.top = b[i].children[2].clientHeight+"px";
+		if (fw[0] == "filters") {
+			var fltrs = b[i];
 		}
 	}
-
-	if (window.divfp != null) {
-		window.divfp.parentNode.removeChild(window.divfp);
-	}
-	window.divfp = window.tl.getDocument().createElement("div");
-	window.divfp.className = "fullPage";
-	delete window.fpimg;
-	window.fpimg = document.createElement('img');
-	window.fpimg.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/exit-fullscreen_white.svg');
-	window.divfp.appendChild(window.fpimg);
-	window.fpimg.style.marginRight="0.15em";
-	window.fpimg.setAttribute('onclick','disableFullPage()');
-	window.tl._containerDiv.appendChild(window.divfp);
-	window.divfp.style.zIndex="100";
-	window.divfp.style.position = "absolute";
-	window.divfp.style.right = "0%";
-	window.divfp.style.bottom = "0%";
-	window.divfp.style.cursor = "pointer";
-
-	if (window.tb.firstChild.children[0] != null) {
-		window.divfpfiltzone = window.tl.getDocument().createElement("div");
-		var divFleche = document.createElement('div');
-		window.fleche = document.createElement('img');
-		window.divfpfiltzone.id = "fullPageFiltersZone";
-		window.divfpfiltzone.style.position = "absolute";
-		window.divfpfiltzone.style.top = "0%";
-		window.divfpfiltzone.style.zIndex="101";
-		window.divfpfiltzone.style.height = "100vh";
-
-		divFleche.id = "divFleche";
-		divFleche.appendChild(fleche);
-		divFleche.style.position = "absolute";
-		divFleche.style.width = "2vw";
-		divFleche.style.right = "0%";
-		divFleche.style.top = "47%";
-		divFleche.style.zIndex = "101";
-		divFleche.style.backgroundColor = "rgb(97, 87, 107)";
-		window.divfpfiltzone.appendChild(divFleche);
-
-		if (screen.height < 864) {
-			window.divfpfiltzone.style.width = "26vw";
-			divFleche.style.height = "5vh";
-			animateLeft(window.divfpfiltzone, 0, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)));
-			window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheDroite.svg');
-			window.fltVisible = 0;
-
-		}
-		else {
-			window.divfpfiltzone.style.width = "19vw";
-			divFleche.style.height = "4vh";
-			//console.log(divFleche.style.width);
-			animateLeft(window.divfpfiltzone, 0, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)));
-			// animateLeft(window.divfpfiltzone, 0, -17);
-			window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheDroite.svg');
-			window.fltVisible = 0;
-		}
-		window.divfpfilt = window.tl.getDocument().createElement("div");
-		window.divfpfilt.id = "fullPageFilters";
-		window.divfpfilt.style.width = "90%";
-		window.divfpfilt.style.height = "100vh";
-		window.divfpfilt.style.position = "absolute";
-		window.divfpfilt.style.top = "0%";
-		window.divfpfilt.style.left = "0%";
-		window.divfpfilt.style.backgroundColor = "rgb(97, 87, 107)";
-		window.divfpfilt.style.zIndex="101";
-		window.divfpfilt.style.overflow = "auto";
-		window.divfpfilt.appendChild(document.getElementById("filters"));
-		window.divfpfilt.firstChild.style.display = "block";
-		window.divfpfilt.style.color = "white";
-		window.divfpfiltzone.appendChild(window.divfpfilt);
-		window.tl._containerDiv.appendChild(divfpfiltzone);
-
-
-		window.fleche.setAttribute('onclick','clickfleche();'); // for FF
-	}
+	tete = document.head;
+	var opened = window.open("","_self");
+	opened.document.write("<html><head><title>MyTitle</title></head><body><div id=\"tout\"></div></body></html>");
+	oTimeline._containerDiv = document.getElementById("tout");
+	oTimeline.loadTimeline(window.tlid,window.tldata,window.params);
+	//opened.document.getElementById("tout").appendChild(tmln);
+	//opened.document.getElementsByTagName('head')[0].appendChild(tete);
+	//console.log(tmln.style);
 }
 
 function disableFullPage() {
@@ -990,6 +897,10 @@ function disableFullPage() {
 	document.getElementsByTagName("header")[0].style.display = "block";
 	document.getElementsByTagName("footer")[0].style.display = "block";
 	document.getElementById("content").style = window.contentStyle;
+	if (document.getElementById("wrap") != null && document.getElementById("wrap") != 'undefined') {
+		var wrap = document.getElementById("wrap");
+		wrap.style.maxWidth =	window.maxwidthwrap;
+	}
 	var b = document.getElementsByClassName("blocks")[0].children;
 	for (var i=0; i<b.length; i++) {
 		var fw = [];
