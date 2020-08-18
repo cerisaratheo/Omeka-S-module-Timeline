@@ -185,3 +185,7 @@ div.simileAjax-bubble-close {
     background-image: url('../img/bubble-arrow-point-down.png') !important;
     background-position: top center !important;
 }
+
+.filters {
+  border-bottom: none;
+}
