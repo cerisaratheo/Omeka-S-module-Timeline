@@ -1,3 +1,17 @@
+
+Cette version de la Timeline est une version modifiée lors de mon stage au laboratoire des Archives Henri Poincaré.
+Elle ajoute les fonctionnalités suivantes, pour le moment en version alpha:
+
+- fullscreen
+- filtres
+- recherche dans metadata
+- export en CSV
+- change focus après recherche (pas fini)
+
+Ci-dessous, le README d'origine de la Timeline.
+
+-----------------------
+
 Timeline (module for Omeka S)
 =============================
 
