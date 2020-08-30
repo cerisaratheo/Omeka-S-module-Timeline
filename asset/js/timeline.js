@@ -545,8 +545,8 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
 	var divlabels = document.getElementById("fltLabelsButton");
 	var divflt = document.getElementById("ckbfilters");
 
-	divlabels.appendChild(tablelabels);
-	divflt.appendChild(tableflt);
+	if (divlabels != null) divlabels.appendChild(tablelabels);
+	if (divflt != null) divflt.appendChild(tableflt);
 
 	window.handlerCkb = function(elmt, evt, target) {
 		onCheck(timeline, bandIndices, tableflt);
@@ -600,6 +600,7 @@ function setupFilterHighlightControls(timeline, bandIndices, theme, params) {
 			td.style.borderBottomStyle = "none";
 		}
 	}
+
 }
 
 function cleanString(s) {
@@ -867,7 +868,186 @@ function animateLeft(obj, from, to){
 	}
 }
 
+function switchFS() {
+	if (window.isfs) {
+		window.isfs = false;
+	} else {
+		window.isfs = true;
+		// TODO: remettre ici le CSS comme avant le fullscreen
+		//alert("small screen");
+		document.removeEventListener("fullscreenchange",window.fsel, false);
+	}
+}
+
 function enableFullPage() {
+
+	var element = document.getElementById("tlandfilters");
+	window.isfs = true;
+	window.fsel = element;
+	element.addEventListener("fullscreenchange", switchFS, false);
+
+	if (element.requestFullscreen) { // W3C API
+		element.requestFullscreen();
+	} else if (element.mozRequestFullScreen) { // Mozilla current API
+		element.mozRequestFullScreen();
+	} else if (element.webkitRequestFullScreen) { // Webkit current API
+		element.webkitRequestFullScreen();
+	}
+
+	var tlband = element.children[0];
+	window.tlbandmargin = tlband.style.margin;
+	tlband.style.margin = "0";
+	window.tlbandpadding = tlband.style.padding;
+	tlband.style.padding = "0";
+	window.tldandheight = tlband.style.height;
+	tlband.style.height = "100vh";
+	window.tlbandwidth = tlband.style.width;
+	tlband.style.width = "100vw";
+
+	var band0 = tlband.children[2];
+	window.band0height = band0.style.height;
+	band0.style.height = "90vh";
+	window.band0top = band0.style.top;
+	band0.style.top= "0";
+
+	var band1 = tlband.children[4];
+	window.band1height = band1.style.height;
+	band1.style.height = "10vh";
+	window.band1top = band1.style.top;
+	//band1.style.top = tlband.clientHeight-10+"px";
+	band1.style.top = "90vh";
+
+
+
+	if (window.divfp != null) {
+		window.divfp.parentNode.removeChild(window.divfp);
+	}
+
+	window.divfp = window.tl.getDocument().createElement("div");
+	window.divfp.className = "fullPage";
+	delete window.fpimg;
+	window.fpimg = document.createElement('img');
+	window.fpimg.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/exit-fullscreen_white.svg');
+	window.divfp.appendChild(window.fpimg);
+	window.fpimg.style.marginRight="0.15em";
+	window.fpimg.setAttribute('onclick','disableFullPage()');
+	window.tl._containerDiv.appendChild(window.divfp);
+	window.divfp.style.zIndex="100";
+	window.divfp.style.position = "absolute";
+	window.divfp.style.right = "0%";
+	window.divfp.style.bottom = "0%";
+	window.divfp.style.cursor = "pointer";
+
+	if (window.tb.firstChild.children[0] != null) {
+		window.divfpfiltzone = window.tl.getDocument().createElement("div");
+		var divFleche = document.createElement('div');
+		window.fleche = document.createElement('img');
+		window.divfpfiltzone.id = "fullPageFiltersZone";
+		window.divfpfiltzone.style.position = "absolute";
+		window.divfpfiltzone.style.top = "0%";
+		window.divfpfiltzone.style.zIndex="101";
+		window.divfpfiltzone.style.height = "100vh";
+
+		divFleche.id = "divFleche";
+		divFleche.appendChild(fleche);
+		divFleche.style.position = "absolute";
+		divFleche.style.width = "2vw";
+		divFleche.style.right = "0%";
+		divFleche.style.top = "47%";
+		divFleche.style.zIndex = "101";
+		divFleche.style.backgroundColor = "rgb(97, 87, 107)";
+		window.divfpfiltzone.appendChild(divFleche);
+
+		if (screen.height < 864) {
+			window.divfpfiltzone.style.width = "26vw";
+			divFleche.style.height = "5vh";
+			animateLeft(window.divfpfiltzone, 0, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)));
+			window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheDroite.svg');
+			window.fltVisible = 0;
+
+		}
+		else {
+			window.divfpfiltzone.style.width = "19vw";
+			divFleche.style.height = "4vh";
+			//console.log(divFleche.style.width);
+			animateLeft(window.divfpfiltzone, 0, -(window.divfpfiltzone.style.width.slice(0, -2)-divFleche.style.width.slice(0, -2)));
+			// animateLeft(window.divfpfiltzone, 0, -17);
+			window.fleche.setAttribute('src', window.pagePrefix+'modules/Timeline/asset/img/flecheDroite.svg');
+			window.fltVisible = 0;
+		}
+		window.divfpfilt = window.tl.getDocument().createElement("div");
+		window.divfpfilt.id = "fullPageFilters";
+		window.divfpfilt.style.width = "90%";
+		window.divfpfilt.style.height = "100vh";
+		window.divfpfilt.style.position = "absolute";
+		window.divfpfilt.style.top = "0%";
+		window.divfpfilt.style.left = "0%";
+		window.divfpfilt.style.backgroundColor = "rgb(97, 87, 107)";
+		window.divfpfilt.style.zIndex="101";
+		window.divfpfilt.style.overflow = "auto";
+		window.divfpfilt.appendChild(document.getElementById("filters"));
+		window.divfpfilt.firstChild.style.display = "block";
+		window.divfpfilt.style.color = "white";
+		window.divfpfiltzone.appendChild(window.divfpfilt);
+		window.tl._containerDiv.appendChild(divfpfiltzone);
+
+
+		window.fleche.setAttribute('onclick','clickfleche();'); // for FF
+	}
+
+	// TODO: finir le CSS pour deplacer la bande du bas et ajouter les filtres
+
+	/*
+	for (var i=0; i<b.length; i++) {
+		var fw = [];
+		fw = b[i].className.split(" ");
+		if (fw[0] === "timeline") {
+			window.cadreExtMargin = b[i].style.margin;
+			b[i].style.margin = "0";
+			window.cadreExtPadding = b[i].style.padding;
+			b[i].style.padding = "0";
+			window.cadreExtHeight = b[i].style.height;
+			b[i].style.height = "100vh";
+			window.cadreExtWidth = b[i].style.width;
+			b[i].style.width = "100vw";
+			window.tlHautHeight = b[i].children[2].style.height;
+			b[i].children[2].style.height = "90vh";
+			b[i].children[2].style.top = 0+"px";
+			window.tlBasTop = b[i].children[4].style.top;
+			b[i].children[4].style.top = "0";
+			window.tlBasHeight = b[i].children[4].style.height;
+			b[i].children[4].style.height = "10vh";
+			b[i].children[4].style.top = b[i].children[2].clientHeight+"px";
+		}
+	}
+	*/
+
+	/*
+	alert("remove all");
+	const rt = document.documentElement;
+	while (rt.firstChild) {
+	    rt.removeChild(rt.lastChild);
+	}
+	rt.appendChild(tl);
+	*/
+
+	/*
+	 *
+	 $timelineVariables = 'Timeline_ajax_url="' . $assetUrl('vendor/simile/ajax-api/simile-ajax-api.js', 'Timeline') . '";' . PHP_EOL;
+                $timelineVariables .= 'Timeline_urlPrefix="' . dirname($assetUrl('vendor/simile/timeline-api/timeline-api.js', 'Timeline')) . '/";' . PHP_EOL;
+                $timelineVariables .= 'Timeline_parameters="bundle=true";';
+                $view->headLink()
+                    ->appendStylesheet($assetUrl('css/timeline.css', 'Timeline'));
+                $view->headScript()
+                    ->appendFile($assetUrl('js/timeline.js', 'Timeline'))
+                    ->appendScript($timelineVariables)
+                    ->appendFile($assetUrl('vendor/simile/timeline-api/timeline-api.js', 'Timeline'))
+                    ->appendScript('SimileAjax.History.enabled = false; // window.jQuery = SimileAjax.jQuery;');
+                break;
+	 *
+	 * */
+
+	/*
 	window.fltVisible=1;
 	var b = document.getElementsByClassName("blocks")[0].children;
 	for (var i=0; i<b.length; i++) {
@@ -882,15 +1062,56 @@ function enableFullPage() {
 	}
 	tete = document.head;
 	var opened = window.open("","_self");
-	opened.document.write("<html><head><title>MyTitle</title></head><body><div id=\"tout\"></div></body></html>");
+	opened.document.write("<html><head><title>MyTitle</title><link href=\""+window.pagePrefix+"/modules/Timeline/asset/css/timeline.css\" rel=\"stylesheet\"></head><body><div id=\"tout\" class=\"timeline\"></div></body></html>");
 	oTimeline._containerDiv = document.getElementById("tout");
-	oTimeline.loadTimeline(window.tlid,window.tldata,window.params);
+	oTimeline.loadTimeline("tout",window.tldata,window.params);
 	//opened.document.getElementById("tout").appendChild(tmln);
 	//opened.document.getElementsByTagName('head')[0].appendChild(tete);
 	//console.log(tmln.style);
+	*/
+
 }
 
 function disableFullPage() {
+	document.exitFullscreen();
+
+	var element = document.getElementById("tlandfilters");
+
+	var tlband = element.children[0];
+	tlband.style.margin = window.tlbandmargin;
+	tlband.style.padding = window.tlbandpadding;
+	tlband.style.height = window.tldandheight;
+	tlband.style.width = window.tlbandwidth;
+
+	var band0 = tlband.children[2];
+	band0.style.height = window.band0height;
+	band0.style.top = window.band0top;
+
+	var band1 = tlband.children[4];
+	band1.style.height = window.band1height;
+	band1.style.top = window.band1top;
+
+	addFullPageButton(window.tlid);
+	if (window.tb.firstChild.children[5] != null) {
+  	metaSearch();
+    if (window.metadataIds.length==0) {
+			rmBtExport();
+    }
+	}
+
+	document.getElementsByClassName("blocks")[0].appendChild(document.getElementById("filters"));
+	recurseDomChildren(document.getElementsByClassName("blocks")[0], "", "");
+	if (window.divfpfiltzone != null) {
+		window.divfpfiltzone.parentNode.removeChild(window.divfpfiltzone);
+	}
+	addFullPageButton(window.tlid);
+	if (window.tb.firstChild.children[5] != null) {
+		metaSearch();
+		if (window.metadataIds.length==0) rmBtExport();
+	}
+
+
+	/*
 	if (document.getElementById("user-bar") != null) {
 		document.getElementById("user-bar").style.display = "block";
 	}
@@ -928,4 +1149,5 @@ function disableFullPage() {
 		metaSearch();
 		if (window.metadataIds.length==0) rmBtExport();
 	}
+	*/
 }

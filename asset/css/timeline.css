@@ -22,6 +22,23 @@
     background: #fff !important;
 }
 
+.timeline:-moz-full-screen {
+    background: red !important;
+}
+
+html:-webkit-full-screen {
+    background: red;
+}
+
+html:-ms-fullscreen {
+    background: red;
+    width: 100%; /* needed to center contents in IE */
+}
+
+html:fullscreen {
+    background: red;
+}
+
 /* Background colors for the top band. */
 .timeline .timeline-band-0 .timeline-ether-bg{
     background-color:rgba(90,80,100, 0.02);
